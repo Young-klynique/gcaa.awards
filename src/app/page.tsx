@@ -15,7 +15,7 @@ export default function HomePage() {
             <span className="text-gold-400 text-sm font-medium">2026 Edition</span>
           </div>
           <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight uppercase">
-            <span className="text-dark-100">NASPA GCAA</span><br className="hidden md:block" />
+            <span className="text-dark-100">NASPA GCAA </span><br className="block md:hidden" />
             <span className="gold-text">AWARDS & MOVIE</span>
           </h1>
           <p className="text-dark-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
