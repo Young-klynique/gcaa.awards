@@ -14,9 +14,9 @@ export default function HomePage() {
             <Sparkles className="w-4 h-4 text-gold-400" />
             <span className="text-gold-400 text-sm font-medium">2026 Edition</span>
           </div>
-          <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-            <span className="text-dark-100">Awards &</span><br className="hidden md:block" />
-            <span className="gold-text">Movie Night</span>
+          <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight uppercase">
+            <span className="text-dark-100">NASPA GCAA</span><br className="hidden md:block" />
+            <span className="gold-text">AWARDS & MOVIE</span>
           </h1>
           <p className="text-dark-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
             Celebrating excellence and honoring outstanding individuals who have made a remarkable impact.
