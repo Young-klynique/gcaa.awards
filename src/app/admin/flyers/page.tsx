@@ -110,7 +110,7 @@ export default function AdminFlyerGenerator() {
                 <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center">
                    <Trophy className="w-12 h-12 text-dark-950" />
                 </div>
-                <h2 className="font-display text-4xl font-bold tracking-widest text-gold-400 uppercase mb-4">Awards & Dinner Night 2026</h2>
+                <h2 className="font-display text-4xl font-bold tracking-widest text-gold-400 uppercase mb-4">NASPA GCAA Awards & Movie 2026</h2>
                 <h1 className="font-display text-7xl font-bold text-white leading-tight mb-4">Official Nominees</h1>
                 <div className="inline-block px-8 py-3 bg-gold-500/10 border border-gold-500/30 rounded-full">
                   <p className="text-3xl font-bold text-gold-400">{selectedCat?.name}</p>

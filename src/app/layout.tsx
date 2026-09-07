@@ -3,11 +3,11 @@ import "./globals.css";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Awards & Dinner Night 2026 | Vote & Nominate",
-  description: "Nominate and vote for your favorite candidates across various award categories. Join us for an unforgettable Awards & Dinner Night celebration.",
-  keywords: ["awards", "voting", "nomination", "dinner night", "ceremony"],
+  title: "NASPA GCAA Awards & Movie 2026 | Vote & Nominate",
+  description: "Nominate and vote for your favorite candidates across various award categories. Join us for an unforgettable NASPA GCAA Awards & Movie celebration.",
+  keywords: ["awards", "voting", "nomination", "movie night", "ceremony"],
   openGraph: {
-    title: "Awards & Dinner Night 2026",
+    title: "NASPA GCAA Awards & Movie 2026",
     description: "Nominate and vote for your favorite candidates across various award categories.",
     type: "website",
   },

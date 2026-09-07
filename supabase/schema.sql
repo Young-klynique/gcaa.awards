@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- =============================================
 CREATE TABLE IF NOT EXISTS event_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_name TEXT NOT NULL DEFAULT 'Awards & Dinner Night 2026',
+  event_name TEXT NOT NULL DEFAULT 'NASPA GCAA Awards & Movie 2026',
   event_date TIMESTAMPTZ,
   nomination_start TIMESTAMPTZ,
   nomination_end TIMESTAMPTZ,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS event_settings (
 
 -- Insert default settings
 INSERT INTO event_settings (event_name, vote_cost_pesewas) 
-VALUES ('Awards & Dinner Night 2026', 100)
+VALUES ('NASPA GCAA Awards & Movie 2026', 100)
 ON CONFLICT DO NOTHING;
 
 -- =============================================

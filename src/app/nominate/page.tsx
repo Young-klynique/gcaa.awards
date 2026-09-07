@@ -40,14 +40,14 @@ export default function NominatePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isNominationOpen(settings)) { toast.error('Nominations are currently closed'); return; }
-    if (!form.category_id || !form.nominee_name || !form.nominator_name) {
+    if (!form.category_id || !form.nominee_name) {
       toast.error('Please fill in all required fields'); return;
     }
     setSubmitting(true);
     const { error } = await supabase.from('nominations').insert({
       category_id: form.category_id,
       nominee_name: form.nominee_name, nominee_phone: form.nominee_phone, nominee_email: form.nominee_email,
-      nominator_name: form.nominator_name, nominator_phone: form.nominator_phone, nominator_email: form.nominator_email,
+      nominator_name: 'Anonymous', nominator_phone: null, nominator_email: null,
       reason: form.reason,
     });
     setSubmitting(false);
@@ -104,23 +104,10 @@ export default function NominatePage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="glass-card p-6 sm:p-8 space-y-6">
-              {/* Your Info */}
-              <div>
-                <h3 className="text-sm font-semibold text-gold-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center text-xs text-gold-300">1</span>
-                  Your Information
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className="form-label">Your Name *</label><input className="form-input" required value={form.nominator_name} onChange={e => setForm({...form, nominator_name: e.target.value})} placeholder="Enter your full name" /></div>
-                  <div><label className="form-label">Your Phone</label><input className="form-input" value={form.nominator_phone} onChange={e => setForm({...form, nominator_phone: e.target.value})} placeholder="024XXXXXXX" /></div>
-                </div>
-                <div className="mt-4"><label className="form-label">Your Email</label><input type="email" className="form-input" value={form.nominator_email} onChange={e => setForm({...form, nominator_email: e.target.value})} placeholder="your@email.com" /></div>
-              </div>
-
               {/* Nominee Info */}
               <div>
                 <h3 className="text-sm font-semibold text-gold-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center text-xs text-gold-300">2</span>
+                  <span className="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center text-xs text-gold-300">1</span>
                   Nominee Information
                 </h3>
                 <div><label className="form-label">Nominee&apos;s Full Name *</label><input className="form-input" required value={form.nominee_name} onChange={e => setForm({...form, nominee_name: e.target.value})} placeholder="Enter nominee's full name" /></div>
@@ -133,7 +120,7 @@ export default function NominatePage() {
               {/* Category & Reason */}
               <div>
                 <h3 className="text-sm font-semibold text-gold-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center text-xs text-gold-300">3</span>
+                  <span className="w-6 h-6 rounded-full bg-gold-500/20 flex items-center justify-center text-xs text-gold-300">2</span>
                   Category & Reason
                 </h3>
                 <div><label className="form-label">Award Category *</label>

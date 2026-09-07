@@ -15,8 +15,8 @@ export default function HomePage() {
             <span className="text-gold-400 text-sm font-medium">2026 Edition</span>
           </div>
           <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-            <span className="text-dark-100">Awards &</span><br />
-            <span className="gold-text">Dinner Night</span>
+            <span className="text-dark-100">Awards &</span><br className="hidden md:block" />
+            <span className="gold-text">Movie Night</span>
           </h1>
           <p className="text-dark-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
             Celebrating excellence and honoring outstanding individuals who have made a remarkable impact.
@@ -40,7 +40,7 @@ export default function HomePage() {
             {[
               { icon: Users, step: '01', title: 'Nominate', desc: 'Submit nominations for deserving individuals across various award categories.' },
               { icon: Vote, step: '02', title: 'Vote', desc: 'Cast your votes for nominees. Each vote costs GH₵ 1.00 via secure payment.' },
-              { icon: Trophy, step: '03', title: 'Celebrate', desc: 'Join us at the grand Awards & Dinner Night to witness the winners crowned.' },
+              { icon: Trophy, step: '03', title: 'Celebrate', desc: 'Join us at the grand NASPA GCAA Awards & Movie to witness the winners crowned.' },
             ].map((item) => (
               <div key={item.step} className="glass-card p-8 relative group hover:border-gold-500/30 transition-all duration-500">
                 <div className="absolute -top-3 -right-3 w-12 h-12 rounded-xl flex items-center justify-center font-display text-2xl font-bold gold-text" style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.15)' }}>{item.step}</div>
