@@ -152,33 +152,33 @@ ALTER TABLE nominees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
--- EVENT SETTINGS: Public can read, only service role can modify
+-- EVENT SETTINGS: Public can read, admins can manage
 CREATE POLICY "Public can read event settings" ON event_settings
   FOR SELECT USING (true);
 
-CREATE POLICY "Service role can manage event settings" ON event_settings
-  FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can manage event settings" ON event_settings
+  FOR ALL USING (auth.role() = 'service_role' OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()));
 
 -- CATEGORIES: Public can read active, admins can manage
 CREATE POLICY "Public can read active categories" ON categories
   FOR SELECT USING (is_active = true);
 
-CREATE POLICY "Service role can manage categories" ON categories
-  FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can manage categories" ON categories
+  FOR ALL USING (auth.role() = 'service_role' OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()));
 
--- NOMINATIONS: Public can insert, service role manages
+-- NOMINATIONS: Public can insert, admins manage
 CREATE POLICY "Public can create nominations" ON nominations
   FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Service role can manage nominations" ON nominations
-  FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can manage nominations" ON nominations
+  FOR ALL USING (auth.role() = 'service_role' OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()));
 
--- NOMINEES: Public can read active, service role manages
+-- NOMINEES: Public can read active, admins manage
 CREATE POLICY "Public can read active nominees" ON nominees
   FOR SELECT USING (is_active = true);
 
-CREATE POLICY "Service role can manage nominees" ON nominees
-  FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can manage nominees" ON nominees
+  FOR ALL USING (auth.role() = 'service_role' OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()));
 
 -- VOTES: Public can insert, read own votes
 CREATE POLICY "Public can create votes" ON votes
@@ -187,8 +187,8 @@ CREATE POLICY "Public can create votes" ON votes
 CREATE POLICY "Public can read votes" ON votes
   FOR SELECT USING (true);
 
-CREATE POLICY "Service role can manage votes" ON votes
-  FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can manage votes" ON votes
+  FOR ALL USING (auth.role() = 'service_role' OR EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid()));
 
 -- ADMIN USERS: Only service role
 CREATE POLICY "Service role can manage admin users" ON admin_users
