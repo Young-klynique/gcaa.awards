@@ -7,7 +7,7 @@ import { generateNomineeCode } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Loader2, Check, X, UserPlus, Eye } from 'lucide-react';
 
-import { sendNominationSMS } from '@/app/actions/sms';
+import { sendSMS } from '@/app/actions/sms';
 
 export default function AdminNominations() {
   const [nominations, setNominations] = useState<Nomination[]>([]);
@@ -25,11 +25,26 @@ export default function AdminNominations() {
 
   useEffect(() => { loadNominations(); }, []);
 
-  const updateStatus = async (id: string, status: 'approved' | 'rejected') => {
-    const { error } = await supabase.from('nominations').update({ status }).eq('id', id);
+  const updateStatus = async (nomination: Nomination, status: 'approved' | 'rejected') => {
+    const { error } = await supabase.from('nominations').update({ status }).eq('id', nomination.id);
     if (error) { toast.error(error.message); return; }
-    toast.success(`Nomination ${status}`);
-    setNominations(prev => prev.map(n => n.id === id ? { ...n, status } : n));
+    
+    if (status === 'approved' && nomination.nominee_phone) {
+      const firstName = nomination.nominee_name.split(' ')[0];
+      const categoryName = (nomination.category as unknown as Category)?.name || 'their category';
+      const message = `Congratulations ${firstName}!!! You have been nominated as ${categoryName}`;
+      
+      const smsResult = await sendSMS(nomination.nominee_phone, message);
+      if (smsResult.success) {
+         toast.success('Approval SMS notification sent to nominee!');
+      } else {
+         toast.error(`SMS failed: ${smsResult.error}`);
+      }
+    } else {
+      toast.success(`Nomination ${status}`);
+    }
+    
+    setNominations(prev => prev.map(n => n.id === nomination.id ? { ...n, status } : n));
     setSelectedNomination(null);
   };
 
@@ -56,13 +71,11 @@ export default function AdminNominations() {
     
     // 4. Send SMS to Nominee
     if (nomination.nominee_phone) {
+      const firstName = nomination.nominee_name.split(' ')[0];
       const categoryName = (nomination.category as unknown as Category)?.name || 'their category';
-      const smsResult = await sendNominationSMS(
-        nomination.nominee_phone,
-        nomination.nominee_name,
-        newCode,
-        categoryName
-      );
+      const message = `Congratulations ${firstName}! You have been nominated for ${categoryName} at the NASPA GCAA Awards & Movie. Your official voting code is: ${newCode}. Share this with your supporters to vote for you!`;
+      
+      const smsResult = await sendSMS(nomination.nominee_phone, message);
       if (smsResult.success) {
          toast.success('SMS notification sent to nominee!');
       } else {
@@ -162,8 +175,8 @@ export default function AdminNominations() {
               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-dark-800">
                  {selectedNomination.status === 'pending' && (
                    <>
-                     <button onClick={() => updateStatus(selectedNomination.id, 'rejected')} className="flex-1 py-2 px-4 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-medium transition-colors">Reject</button>
-                     <button onClick={() => updateStatus(selectedNomination.id, 'approved')} className="flex-1 py-2 px-4 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 font-medium transition-colors">Approve</button>
+                     <button onClick={() => updateStatus(selectedNomination, 'rejected')} className="flex-1 py-2 px-4 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-medium transition-colors">Reject</button>
+                     <button onClick={() => updateStatus(selectedNomination, 'approved')} className="flex-1 py-2 px-4 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 font-medium transition-colors">Approve</button>
                    </>
                  )}
                  <button 

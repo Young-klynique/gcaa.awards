@@ -1,6 +1,6 @@
 'use server';
 
-export async function sendNominationSMS(phone: string, name: string, code: string, categoryName: string) {
+export async function sendSMS(phone: string, message: string) {
   try {
     const apiKey = process.env.WHISTLEPULSE_API_KEY;
     const senderId = process.env.WHISTLEPULSE_SENDER_ID || 'NASPA GCAA';
@@ -21,8 +21,6 @@ export async function sendNominationSMS(phone: string, name: string, code: strin
     } else if (formattedPhone.startsWith('+')) {
       formattedPhone = formattedPhone.substring(1);
     }
-
-    const message = `Congratulations ${name}! You have been nominated for ${categoryName} at the NASPA GCAA Awards & Movie. Your official voting code is: ${code}. Share this with your supporters to vote for you!`;
 
     // The endpoint is POST /messages-api/single
     const baseUrl = process.env.WHISTLEPULSE_BASE_URL || 'https://api.whistlepulse.com';
