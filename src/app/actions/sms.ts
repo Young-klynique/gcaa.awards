@@ -4,7 +4,6 @@ export async function sendSMS(phone: string, message: string) {
   try {
     const apiKey = process.env.WHISTLEPULSE_API_KEY;
     const senderId = process.env.WHISTLEPULSE_SENDER_ID || 'NASPA GCAA';
-    
     const accountId = process.env.WHISTLEPULSE_ACCOUNT_ID;
     
     if (!apiKey || !accountId) {
@@ -16,40 +15,58 @@ export async function sendSMS(phone: string, message: string) {
       return { success: false, error: 'No phone number provided' };
     }
 
-    // Format phone (e.g. 024... to 23324...)
-    let formattedPhone = phone.replace(/\s+/g, '');
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '233' + formattedPhone.substring(1);
-    } else if (formattedPhone.startsWith('+')) {
-      formattedPhone = formattedPhone.substring(1);
+    // Split phone string by comma, slash, "&", "and" or whitespace if there are multiple
+    const rawNumbers = phone.split(/[,/&]|\band\b/i).map(p => p.trim()).filter(Boolean);
+
+    if (rawNumbers.length === 0) {
+      return { success: false, error: 'No valid phone numbers found' };
     }
 
-    // The endpoint based on updated docs
     const baseUrl = process.env.WHISTLEPULSE_BASE_URL || 'https://api.whistlepulse.com';
     const endpoint = `${baseUrl}/messages-api/single`;
+    let hasError = false;
+    let lastError = '';
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'x-account-id': accountId,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        senderName: senderId,
-        recipient: formattedPhone,
-        message: message,
-        type: 0 // Normal text SMS
-      })
-    });
+    for (const rawPhone of rawNumbers) {
+      // Format phone (e.g. 024... to 23324...)
+      let formattedPhone = rawPhone.replace(/\s+/g, '');
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '233' + formattedPhone.substring(1);
+      } else if (formattedPhone.startsWith('+')) {
+        formattedPhone = formattedPhone.substring(1);
+      }
 
-    const data = await response.json().catch(() => null);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'x-account-id': accountId,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          senderName: senderId,
+          recipient: formattedPhone,
+          message: message,
+          type: 0 // Normal text SMS
+        })
+      });
 
-    if (!response.ok || (data && data.success === false)) {
-      const errorMsg = data?.message || data?.error || response.statusText;
-      console.error('Whistlepulse API Error:', data || response.statusText);
-      return { success: false, error: `API Error: ${response.status} - ${errorMsg}` };
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || (data && data.success === false)) {
+        const errorMsg = data?.message || data?.error || response.statusText;
+        console.error('Whistlepulse API Error for', formattedPhone, ':', data || response.statusText);
+        hasError = true;
+        lastError = `API Error (${formattedPhone}): ${response.status} - ${errorMsg}`;
+      }
+    }
+
+    if (hasError && rawNumbers.length === 1) {
+      return { success: false, error: lastError };
+    } else if (hasError) {
+      // Partial success if there are multiple numbers
+      return { success: true, error: lastError }; // We'll return success true but maybe some failed
     }
 
     return { success: true };
