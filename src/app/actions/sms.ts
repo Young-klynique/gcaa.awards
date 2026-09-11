@@ -5,9 +5,11 @@ export async function sendSMS(phone: string, message: string) {
     const apiKey = process.env.WHISTLEPULSE_API_KEY;
     const senderId = process.env.WHISTLEPULSE_SENDER_ID || 'NASPA GCAA';
     
-    if (!apiKey) {
-      console.warn('Whistlepulse API Key not set. SMS not sent.');
-      return { success: false, error: 'SMS API Key not configured' };
+    const accountId = process.env.WHISTLEPULSE_ACCOUNT_ID;
+    
+    if (!apiKey || !accountId) {
+      console.warn('Whistlepulse API Key or Account ID not set. SMS not sent.');
+      return { success: false, error: 'SMS credentials not configured (Missing API Key or Account ID)' };
     }
 
     if (!phone) {
@@ -22,15 +24,16 @@ export async function sendSMS(phone: string, message: string) {
       formattedPhone = formattedPhone.substring(1);
     }
 
-    // The endpoint is POST /messages-api/single
-    const baseUrl = process.env.WHISTLEPULSE_BASE_URL || 'https://api.whistlepulse.com';
+    // The endpoint based on updated docs
+    const baseUrl = process.env.WHISTLEPULSE_BASE_URL || 'https://api.whistlepulse.com/api';
     const endpoint = `${baseUrl}/messages-api/single`;
 
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'x-api-key': apiKey,
+        'x-account-id': accountId,
         'Accept': 'application/json'
       },
       body: JSON.stringify({
