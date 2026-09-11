@@ -25,7 +25,7 @@ export async function sendSMS(phone: string, message: string) {
     }
 
     // The endpoint based on updated docs
-    const baseUrl = process.env.WHISTLEPULSE_BASE_URL || 'https://api.whistlepulse.com/api';
+    const baseUrl = process.env.WHISTLEPULSE_BASE_URL || 'https://api.whistlepulse.com';
     const endpoint = `${baseUrl}/messages-api/single`;
 
     const response = await fetch(endpoint, {
@@ -47,8 +47,9 @@ export async function sendSMS(phone: string, message: string) {
     const data = await response.json().catch(() => null);
 
     if (!response.ok || (data && data.success === false)) {
+      const errorMsg = data?.message || data?.error || response.statusText;
       console.error('Whistlepulse API Error:', data || response.statusText);
-      return { success: false, error: 'Failed to send SMS' };
+      return { success: false, error: `API Error: ${response.status} - ${errorMsg}` };
     }
 
     return { success: true };
