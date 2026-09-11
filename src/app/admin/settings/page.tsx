@@ -41,7 +41,6 @@ export default function AdminSettings() {
     
     const updates = {
       event_name: settings.event_name,
-      vote_cost_pesewas: settings.vote_cost_pesewas,
       allow_multiple_votes: settings.allow_multiple_votes,
       max_votes_per_person: settings.max_votes_per_person,
       nomination_start: formatForDB(settings.nomination_start),
@@ -103,12 +102,12 @@ export default function AdminSettings() {
            <h2 className="text-lg font-bold text-dark-100 mb-4 border-b border-dark-800/50 pb-2">Payment & Voting Logic</h2>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
               <div>
-                 <label className="form-label">Cost per Vote (in Pesewas)</label>
+                 <label className="form-label">Cost per Vote</label>
                  <div className="relative">
                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500">GH₵</span>
-                   <input type="number" min="100" className="form-input pl-12" value={settings.vote_cost_pesewas / 100} onChange={e => setSettings({...settings, vote_cost_pesewas: parseInt(e.target.value) * 100})} />
+                   <input type="number" disabled readOnly className="form-input pl-12 bg-dark-900 cursor-not-allowed opacity-70" value="1.00" />
                  </div>
-                 <p className="text-xs text-dark-400 mt-1">Example: 100 pesewas = GH₵ 1.00</p>
+                 <p className="text-xs text-dark-400 mt-1">Fixed at GH₵ 1.00 (100 pesewas) per vote.</p>
               </div>
               <div>
                  <label className="form-label">Max Votes per Transaction</label>
