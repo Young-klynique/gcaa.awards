@@ -14,6 +14,7 @@ export default function AdminNominations() {
   const [loading, setLoading] = useState(true);
   const [selectedNomination, setSelectedNomination] = useState<Nomination | null>(null);
   const [isConverting, setIsConverting] = useState(false);
+  const [isSendingSMS, setIsSendingSMS] = useState(false);
   const supabase = createClient();
 
   const loadNominations = async () => {
@@ -21,6 +22,31 @@ export default function AdminNominations() {
     const { data } = await supabase.from('nominations').select('*, category:categories(name)').order('created_at', { ascending: false });
     if (data) setNominations(data as Nomination[]);
     setLoading(false);
+  };
+
+  const resendApprovalSMS = async () => {
+    if (!selectedNomination || !selectedNomination.nominee_phone) return;
+    setIsSendingSMS(true);
+    try {
+      const firstName = selectedNomination.nominee_name.split(' ')[0];
+      const categoryName = (selectedNomination.category as unknown as Category)?.name || 'their category';
+      const message = `Congratulations ${firstName}!!! You have been nominated as ${categoryName}`;
+      
+      const smsResult = await sendSMS(selectedNomination.nominee_phone, message);
+      if (smsResult.success) {
+         if (smsResult.error) {
+           toast.warning(`Sent partially: ${smsResult.error}`);
+         } else {
+           toast.success('Approval SMS sent successfully!');
+         }
+      } else {
+         toast.error(`SMS failed: ${smsResult.error}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'An unexpected error occurred');
+    } finally {
+      setIsSendingSMS(false);
+    }
   };
 
   useEffect(() => { loadNominations(); }, []);
@@ -36,7 +62,11 @@ export default function AdminNominations() {
       
       const smsResult = await sendSMS(nomination.nominee_phone, message);
       if (smsResult.success) {
-         toast.success('Approval SMS notification sent to nominee!');
+         if (smsResult.error) {
+           toast.warning(`Sent partially: ${smsResult.error}`);
+         } else {
+           toast.success('Approval SMS notification sent to nominee!');
+         }
       } else {
          toast.error(`SMS failed: ${smsResult.error}`);
       }
@@ -78,7 +108,11 @@ export default function AdminNominations() {
         
         const smsResult = await sendSMS(nomination.nominee_phone, message);
         if (smsResult.success) {
-           toast.success('SMS notification sent to nominee!');
+           if (smsResult.error) {
+             toast.warning(`Sent partially: ${smsResult.error}`);
+           } else {
+             toast.success('SMS notification sent to nominee!');
+           }
         } else {
            toast.error(`SMS failed: ${smsResult.error}`);
         }
@@ -183,6 +217,16 @@ export default function AdminNominations() {
                      <button onClick={() => updateStatus(selectedNomination, 'rejected')} className="flex-1 py-2 px-4 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-medium transition-colors">Reject</button>
                      <button onClick={() => updateStatus(selectedNomination, 'approved')} className="flex-1 py-2 px-4 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 font-medium transition-colors">Approve</button>
                    </>
+                 )}
+                 {selectedNomination.status === 'approved' && selectedNomination.nominee_phone && (
+                   <button 
+                     onClick={resendApprovalSMS} 
+                     disabled={isSendingSMS}
+                     className="flex-1 py-2 px-4 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 font-medium transition-colors flex items-center justify-center gap-2"
+                   >
+                     {isSendingSMS ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                     Resend Approval SMS
+                   </button>
                  )}
                  <button 
                    onClick={() => convertToNominee(selectedNomination)} 
