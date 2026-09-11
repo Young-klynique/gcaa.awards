@@ -50,43 +50,48 @@ export default function AdminNominations() {
 
   const convertToNominee = async (nomination: Nomination) => {
     setIsConverting(true);
-    // 1. Get next code index
-    const { count } = await supabase.from('nominees').select('*', { count: 'exact', head: true });
-    const newCode = generateNomineeCode();
+    try {
+      // 1. Get next code index
+      const { count } = await supabase.from('nominees').select('*', { count: 'exact', head: true });
+      const newCode = generateNomineeCode();
 
-    // 2. Insert into nominees
-    const { error: nomError } = await supabase.from('nominees').insert({
-      category_id: nomination.category_id,
-      name: nomination.nominee_name,
-      code: newCode,
-      phone: nomination.nominee_phone,
-      email: nomination.nominee_email,
-      bio: nomination.reason // Use reason as initial bio
-    });
+      // 2. Insert into nominees
+      const { error: nomError } = await supabase.from('nominees').insert({
+        category_id: nomination.category_id,
+        name: nomination.nominee_name,
+        code: newCode,
+        phone: nomination.nominee_phone,
+        email: nomination.nominee_email,
+        bio: nomination.reason // Use reason as initial bio
+      });
 
-    if (nomError) { toast.error(nomError.message); setIsConverting(false); return; }
+      if (nomError) { toast.error(nomError.message); setIsConverting(false); return; }
 
-    // 3. Mark nomination as approved
-    await supabase.from('nominations').update({ status: 'approved' }).eq('id', nomination.id);
-    
-    // 4. Send SMS to Nominee
-    if (nomination.nominee_phone) {
-      const firstName = nomination.nominee_name.split(' ')[0];
-      const categoryName = (nomination.category as unknown as Category)?.name || 'their category';
-      const message = `Congratulations ${firstName}! You have been nominated for ${categoryName} at the NASPA GCAA Awards & Movie. Your official voting code is: ${newCode}. Share this with your supporters to vote for you!`;
+      // 3. Mark nomination as approved
+      await supabase.from('nominations').update({ status: 'approved' }).eq('id', nomination.id);
       
-      const smsResult = await sendSMS(nomination.nominee_phone, message);
-      if (smsResult.success) {
-         toast.success('SMS notification sent to nominee!');
-      } else {
-         toast.error(`SMS failed: ${smsResult.error}`);
+      // 4. Send SMS to Nominee
+      if (nomination.nominee_phone) {
+        const firstName = nomination.nominee_name.split(' ')[0];
+        const categoryName = (nomination.category as unknown as Category)?.name || 'their category';
+        const message = `Congratulations ${firstName}! You have been nominated for ${categoryName} at the NASPA GCAA Awards & Movie. Your official voting code is: ${newCode}. Share this with your supporters to vote for you!`;
+        
+        const smsResult = await sendSMS(nomination.nominee_phone, message);
+        if (smsResult.success) {
+           toast.success('SMS notification sent to nominee!');
+        } else {
+           toast.error(`SMS failed: ${smsResult.error}`);
+        }
       }
-    }
 
-    toast.success(`Nominee created with code: ${newCode}`);
-    setIsConverting(false);
-    setSelectedNomination(null);
-    loadNominations();
+      toast.success(`Nominee created with code: ${newCode}`);
+      setSelectedNomination(null);
+      loadNominations();
+    } catch (err: any) {
+      toast.error(err.message || 'An unexpected error occurred');
+    } finally {
+      setIsConverting(false);
+    }
   };
 
   return (
