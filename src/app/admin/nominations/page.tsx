@@ -7,6 +7,8 @@ import { generateNomineeCode } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Loader2, Check, X, UserPlus, Eye } from 'lucide-react';
 
+import { sendNominationSMS } from '@/app/actions/sms';
+
 export default function AdminNominations() {
   const [nominations, setNominations] = useState<Nomination[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,22 @@ export default function AdminNominations() {
     // 3. Mark nomination as approved
     await supabase.from('nominations').update({ status: 'approved' }).eq('id', nomination.id);
     
+    // 4. Send SMS to Nominee
+    if (nomination.nominee_phone) {
+      const categoryName = (nomination.category as unknown as Category)?.name || 'their category';
+      const smsResult = await sendNominationSMS(
+        nomination.nominee_phone,
+        nomination.nominee_name,
+        newCode,
+        categoryName
+      );
+      if (smsResult.success) {
+         toast.success('SMS notification sent to nominee!');
+      } else {
+         toast.error(`SMS failed: ${smsResult.error}`);
+      }
+    }
+
     toast.success(`Nominee created with code: ${newCode}`);
     setIsConverting(false);
     setSelectedNomination(null);
