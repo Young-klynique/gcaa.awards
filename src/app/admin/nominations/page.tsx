@@ -11,6 +11,7 @@ import { sendSMS } from '@/app/actions/sms';
 
 export default function AdminNominations() {
   const [nominations, setNominations] = useState<Nomination[]>([]);
+  const [existingNominees, setExistingNominees] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedNomination, setSelectedNomination] = useState<Nomination | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -20,6 +21,12 @@ export default function AdminNominations() {
   const loadNominations = async () => {
     setLoading(true);
     const { data } = await supabase.from('nominations').select('*, category:categories(name)').order('created_at', { ascending: false });
+    
+    const { data: nomineesData } = await supabase.from('nominees').select('name, category_id');
+    if (nomineesData) {
+      setExistingNominees(new Set(nomineesData.map(n => `${n.category_id}-${n.name.toLowerCase().trim()}`)));
+    }
+
     if (data) setNominations(data as Nomination[]);
     setLoading(false);
   };
@@ -228,14 +235,20 @@ export default function AdminNominations() {
                      Resend Approval SMS
                    </button>
                  )}
-                 <button 
-                   onClick={() => convertToNominee(selectedNomination)} 
-                   disabled={isConverting}
-                   className="flex-1 gold-btn flex items-center justify-center gap-2"
-                 >
-                   {isConverting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-                   Create Official Nominee
-                 </button>
+                 {existingNominees.has(`${selectedNomination.category_id}-${selectedNomination.nominee_name.toLowerCase().trim()}`) ? (
+                   <button disabled className="flex-1 py-2 px-4 rounded-lg bg-dark-800 text-dark-400 font-medium border border-dark-700 cursor-not-allowed">
+                     Already Official Nominee
+                   </button>
+                 ) : (
+                   <button 
+                     onClick={() => convertToNominee(selectedNomination)} 
+                     disabled={isConverting}
+                     className="flex-1 gold-btn flex items-center justify-center gap-2"
+                   >
+                     {isConverting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                     Create Official Nominee
+                   </button>
+                 )}
               </div>
            </div>
         </div>
