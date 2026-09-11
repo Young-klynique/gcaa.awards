@@ -67,6 +67,19 @@ export default function AdminNominees() {
     loadData();
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this nominee? This cannot be undone.')) return;
+    setUploading(true);
+    const { error } = await supabase.from('nominees').delete().eq('id', id);
+    setUploading(false);
+    
+    if (error) { toast.error(error.message); return; }
+    
+    toast.success('Nominee deleted successfully');
+    setEditingNominee(null);
+    loadData();
+  };
+
   const filteredNominees = nominees.filter(n => {
     const matchCat = filterCat === 'all' || n.category_id === filterCat;
     const matchSearch = n.name.toLowerCase().includes(searchQuery.toLowerCase()) || n.code.toLowerCase().includes(searchQuery.toLowerCase());
@@ -138,7 +151,12 @@ export default function AdminNominees() {
                    <input type="checkbox" id="isActiveNom" checked={editingNominee.is_active} onChange={e => setEditingNominee({...editingNominee, is_active: e.target.checked})} className="w-4 h-4 accent-gold-500 rounded bg-dark-800" />
                    <label htmlFor="isActiveNom" className="text-sm text-dark-200">Active (Visible on voting page)</label>
                  </div>
-                 <button type="submit" disabled={uploading} className="gold-btn w-full mt-4">{uploading ? 'Saving...' : 'Save Changes'}</button>
+                 <div className="flex gap-3 mt-4">
+                   <button type="button" onClick={() => handleDelete(editingNominee.id)} disabled={uploading} className="py-2 px-4 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-medium transition-colors flex items-center justify-center gap-2">
+                     <Trash2 className="w-4 h-4" /> Delete
+                   </button>
+                   <button type="submit" disabled={uploading} className="gold-btn flex-1">{uploading ? 'Saving...' : 'Save Changes'}</button>
+                 </div>
               </form>
            </div>
         </div>

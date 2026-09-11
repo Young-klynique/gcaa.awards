@@ -22,9 +22,14 @@ export default function AdminNominations() {
     setLoading(true);
     const { data } = await supabase.from('nominations').select('*, category:categories(name)').order('created_at', { ascending: false });
     
-    const { data: nomineesData } = await supabase.from('nominees').select('name, category_id');
+    const { data: nomineesData } = await supabase.from('nominees').select('name, category_id, phone');
     if (nomineesData) {
-      setExistingNominees(new Set(nomineesData.map(n => `${n.category_id}-${n.name.toLowerCase().trim()}`)));
+      const existing = new Set<string>();
+      nomineesData.forEach(n => {
+        if (n.name) existing.add(`${n.category_id}-${n.name.toLowerCase().replace(/\s+/g, '')}`);
+        if (n.phone) existing.add(n.phone.replace(/\s+/g, ''));
+      });
+      setExistingNominees(existing);
     }
 
     if (data) setNominations(data as Nomination[]);
@@ -235,20 +240,26 @@ export default function AdminNominations() {
                      Resend Approval SMS
                    </button>
                  )}
-                 {existingNominees.has(`${selectedNomination.category_id}-${selectedNomination.nominee_name.toLowerCase().trim()}`) ? (
-                   <button disabled className="flex-1 py-2 px-4 rounded-lg bg-dark-800 text-dark-400 font-medium border border-dark-700 cursor-not-allowed">
-                     Already Official Nominee
-                   </button>
-                 ) : (
-                   <button 
-                     onClick={() => convertToNominee(selectedNomination)} 
-                     disabled={isConverting}
-                     className="flex-1 gold-btn flex items-center justify-center gap-2"
-                   >
-                     {isConverting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-                     Create Official Nominee
-                   </button>
-                 )}
+                 {(() => {
+                   const nameKey = `${selectedNomination.category_id}-${selectedNomination.nominee_name.toLowerCase().replace(/\s+/g, '')}`;
+                   const phoneKey = selectedNomination.nominee_phone ? selectedNomination.nominee_phone.replace(/\s+/g, '') : null;
+                   const isDuplicate = existingNominees.has(nameKey) || (phoneKey && existingNominees.has(phoneKey));
+                   
+                   return isDuplicate ? (
+                     <button disabled className="flex-1 py-2 px-4 rounded-lg bg-dark-800 text-dark-400 font-medium border border-dark-700 cursor-not-allowed">
+                       Already Official Nominee
+                     </button>
+                   ) : (
+                     <button 
+                       onClick={() => convertToNominee(selectedNomination)} 
+                       disabled={isConverting}
+                       className="flex-1 gold-btn flex items-center justify-center gap-2"
+                     >
+                       {isConverting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                       Create Official Nominee
+                     </button>
+                   );
+                 })()}
               </div>
            </div>
         </div>
