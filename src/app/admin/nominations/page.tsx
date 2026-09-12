@@ -119,7 +119,7 @@ export default function AdminNominations() {
       if (nomination.nominee_phone) {
         const firstName = nomination.nominee_name.split(' ')[0];
         const categoryName = (nomination.category as unknown as Category)?.name || 'their category';
-        const message = `Congratulations ${firstName}! You have been nominated for ${categoryName} at the NASPA GCAA Awards & Movie. Your official voting code is: ${newCode}. Share this with your supporters to vote for you!`;
+        const message = `This is your nomination ${newCode} for ${categoryName}. Your fans can vote for you using this code`;
         
         const smsResult = await sendSMS(nomination.nominee_phone, message);
         if (smsResult.success) {
