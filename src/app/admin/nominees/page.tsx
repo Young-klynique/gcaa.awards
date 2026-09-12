@@ -30,7 +30,10 @@ export default function AdminNominees() {
     setLoading(false);
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    // eslint-disable-next-line
+    loadData(); 
+  }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

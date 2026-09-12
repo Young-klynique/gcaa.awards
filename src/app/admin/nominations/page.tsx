@@ -54,14 +54,17 @@ export default function AdminNominations() {
       } else {
          toast.error(`SMS failed: ${smsResult.error}`);
       }
-    } catch (err: any) {
-      toast.error(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'An unexpected error occurred');
     } finally {
       setIsSendingSMS(false);
     }
   };
 
-  useEffect(() => { loadNominations(); }, []);
+  useEffect(() => { 
+    // eslint-disable-next-line
+    loadNominations(); 
+  }, []);
 
   const updateStatus = async (nomination: Nomination, status: 'approved' | 'rejected') => {
     const { error } = await supabase.from('nominations').update({ status }).eq('id', nomination.id);
@@ -133,8 +136,8 @@ export default function AdminNominations() {
       toast.success(`Nominee created with code: ${newCode}`);
       setSelectedNomination(null);
       loadNominations();
-    } catch (err: any) {
-      toast.error(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'An unexpected error occurred');
     } finally {
       setIsConverting(false);
     }

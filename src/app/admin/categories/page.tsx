@@ -27,6 +27,7 @@ export default function AdminCategories() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     loadCategories();
   }, []);
 
