@@ -97,7 +97,7 @@ export default function AdminNominations() {
     setIsConverting(true);
     try {
       // 1. Get next code index
-      const { count } = await supabase.from('nominees').select('*', { count: 'exact', head: true });
+      await supabase.from('nominees').select('*', { count: 'exact', head: true });
       const newCode = generateNomineeCode();
 
       // 2. Insert into nominees
