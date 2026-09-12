@@ -2,9 +2,9 @@
 
 export async function sendSMS(phone: string, message: string) {
   try {
-    const apiKey = process.env.WHISTLEPULSE_API_KEY;
+    const apiKey = process.env.WHISTLEPULSE_API_KEY || 'f32a642e59994d07b8b3ed830b493499';
     const senderId = process.env.WHISTLEPULSE_SENDER_ID || 'NASPA GCAA';
-    const accountId = process.env.WHISTLEPULSE_ACCOUNT_ID;
+    const accountId = process.env.WHISTLEPULSE_ACCOUNT_ID || '68a9ca17ea4ce180c5588b8d';
     
     if (!apiKey || !accountId) {
       console.warn('Whistlepulse API Key or Account ID not set. SMS not sent.');
