@@ -77,8 +77,11 @@ export function initiatePayment({
     throw new Error('Paystack script is blocked or not loaded. Please disable your adblocker and refresh the page.');
   }
 
-  const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
-  if (!publicKey || publicKey.includes('your_paystack_public_key')) {
+  const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY && !process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY.includes('your_paystack_public_key') 
+    ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY 
+    : 'pk_live_075097617e76e39308af07ba479b7f4751132ca1';
+
+  if (!publicKey) {
     throw new Error('Paystack Public Key is missing or invalid in your Vercel Environment Variables.');
   }
 
