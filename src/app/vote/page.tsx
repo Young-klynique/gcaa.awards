@@ -78,7 +78,10 @@ export default function VotePage() {
         },
         onClose: () => { setProcessing(false); toast.info('Payment cancelled'); },
       });
-    } catch { toast.error('Failed to initialize payment'); setProcessing(false); }
+    } catch (err: any) { 
+      toast.error('Payment Error: ' + (err.message || 'Failed to initialize payment')); 
+      setProcessing(false); 
+    }
   }, [selectedNominee, voterEmail, voterName, voteQty, totalCost, settings]);
 
   if (loading) return <div className="min-h-screen gradient-bg flex items-center justify-center"><Loader2 className="w-8 h-8 text-gold-400 animate-spin" /></div>;
