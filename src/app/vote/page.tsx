@@ -61,22 +61,24 @@ export default function VotePage() {
         amountPesewas: totalCost,
         reference: ref,
         metadata: { nominee_id: selectedNominee.id, category_id: selectedNominee.category_id, quantity: voteQty, voter_name: voterName },
-        onSuccess: async (response) => {
-          try {
-            const verifyRes = await fetch('/api/verify-payment', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ reference: response.reference, nominee_id: selectedNominee.id, category_id: selectedNominee.category_id, quantity: voteQty, voter_email: voterEmail, voter_name: voterName }),
-            });
-            const data = await verifyRes.json();
-            if (data.success) {
-              toast.success(`Successfully cast ${voteQty} vote(s) for ${selectedNominee.name}!`);
-              setNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, vote_count: n.vote_count + voteQty } : n));
-              setSelectedNominee(null); setVoterEmail(''); setVoterName(''); setVoteQty(1);
-            } else { toast.error(data.error || 'Payment verification failed'); }
-          } catch { toast.error('Error verifying payment'); }
-          setProcessing(false);
+        onSuccess: function(response) {
+          (async () => {
+            try {
+              const verifyRes = await fetch('/api/verify-payment', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reference: response.reference, nominee_id: selectedNominee.id, category_id: selectedNominee.category_id, quantity: voteQty, voter_email: voterEmail, voter_name: voterName }),
+              });
+              const data = await verifyRes.json();
+              if (data.success) {
+                toast.success(`Successfully cast ${voteQty} vote(s) for ${selectedNominee.name}!`);
+                setNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, vote_count: n.vote_count + voteQty } : n));
+                setSelectedNominee(null); setVoterEmail(''); setVoterName(''); setVoteQty(1);
+              } else { toast.error(data.error || 'Payment verification failed'); }
+            } catch { toast.error('Error verifying payment'); }
+            setProcessing(false);
+          })();
         },
-        onClose: () => { setProcessing(false); toast.info('Payment cancelled'); },
+        onClose: function() { setProcessing(false); toast.info('Payment cancelled'); },
       });
     } catch (err: any) { 
       toast.error('Payment Error: ' + (err.message || 'Failed to initialize payment')); 
