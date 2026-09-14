@@ -124,23 +124,25 @@ export default function VotePage() {
               </div>
 
               {/* Nominee Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 {filteredNominees.map(nominee => (
-                  <div key={nominee.id} className="nominee-card">
+                  <div key={nominee.id} className="nominee-card flex flex-col">
                     <div className="aspect-square bg-dark-800 relative overflow-hidden">
                       {nominee.photo_url ? (
                         <img src={nominee.photo_url} alt={nominee.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center"><User className="w-20 h-20 text-dark-600" /></div>
+                        <div className="w-full h-full flex items-center justify-center"><User className="w-10 sm:w-20 h-10 sm:h-20 text-dark-600" /></div>
                       )}
-                      <div className="absolute top-3 right-3 badge badge-pending">{nominee.code}</div>
+                      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 badge badge-pending !text-[9px] sm:!text-xs !px-1.5 sm:!px-2 !py-0.5 sm:!py-1">{nominee.code}</div>
                     </div>
-                    <div className="p-5">
-                      <h3 className="font-display text-lg font-bold text-dark-100 mb-1">{nominee.name}</h3>
-                      <p className="text-dark-500 text-xs uppercase tracking-wider mb-3">{(nominee.category as unknown as Category)?.name || 'Category'}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gold-400 font-bold text-sm">{nominee.vote_count} votes</span>
-                        <button onClick={() => setSelectedNominee(nominee)} className="gold-btn !py-2 !px-4 !text-xs">Vote Now</button>
+                    <div className="p-3 sm:p-5 flex flex-col flex-1 justify-between">
+                      <div>
+                        <h3 className="font-display text-sm sm:text-lg font-bold text-dark-100 mb-0.5 sm:mb-1 truncate">{nominee.name}</h3>
+                        <p className="text-dark-500 text-[9px] sm:text-xs uppercase tracking-wider mb-2 sm:mb-3 truncate">{(nominee.category as unknown as Category)?.name || 'Category'}</p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mt-auto">
+                        <span className="text-gold-400 font-bold text-[11px] sm:text-sm">{nominee.vote_count} votes</span>
+                        <button onClick={() => setSelectedNominee(nominee)} className="gold-btn !py-1.5 sm:!py-2 !px-2 sm:!px-4 !text-[10px] sm:!text-xs w-full sm:w-auto text-center">Vote</button>
                       </div>
                     </div>
                   </div>
