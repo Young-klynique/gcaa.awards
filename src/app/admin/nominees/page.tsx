@@ -97,7 +97,27 @@ export default function AdminNominees() {
           <h1 className="text-2xl font-bold text-dark-100">Official Nominees</h1>
           <p className="text-dark-400 text-sm">Manage verified candidates on the voting platform.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+           <button 
+             onClick={async () => {
+               if (!window.confirm('This will scan Paystack for any missed payments and automatically add the votes. Proceed?')) return;
+               setLoading(true);
+               try {
+                 const res = await fetch('/api/admin/recover-votes', { method: 'POST' });
+                 const data = await res.json();
+                 if (data.success) {
+                   toast.success(`Successfully recovered ${data.recoveredCount} missed vote(s)!`);
+                   loadData();
+                 } else {
+                   toast.error(data.error || 'Failed to sync votes');
+                   setLoading(false);
+                 }
+               } catch (e) { toast.error('Error syncing'); setLoading(false); }
+             }}
+             className="gold-btn-outline !py-2 !px-4 !text-xs whitespace-nowrap"
+           >
+             Sync Missing Votes
+           </button>
            <div className="relative">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
              <input className="form-input pl-10 text-sm py-2" placeholder="Search by name or code..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
