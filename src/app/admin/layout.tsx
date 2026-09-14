@@ -70,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Nominations', href: '/admin/nominations', icon: Users },
     { name: 'Nominees', href: '/admin/nominees', icon: Users },
     { name: 'Votes', href: '/admin/votes', icon: Vote },
-    { name: 'Flyer Generator', href: '/admin/flyers', icon: ImageIcon },
+    { name: 'Flyer Generator', href: '/admin/flyer', icon: ImageIcon },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
