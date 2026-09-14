@@ -58,6 +58,7 @@ export default function AdminNominees() {
       category_id: editingNominee.category_id,
       bio: editingNominee.bio,
       is_active: editingNominee.is_active,
+      vote_count: editingNominee.vote_count,
       photo_url
     }).eq('id', editingNominee.id);
 
@@ -148,6 +149,11 @@ export default function AdminNominees() {
                     <select className="form-select" value={editingNominee.category_id} onChange={e => setEditingNominee({...editingNominee, category_id: e.target.value})}>
                       {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
+                 </div>
+                 <div>
+                    <label className="form-label">Total Votes (Manual Adjust)</label>
+                    <input type="number" required min="0" className="form-input" value={editingNominee.vote_count} onChange={e => setEditingNominee({...editingNominee, vote_count: parseInt(e.target.value) || 0})} />
+                    <p className="text-[10px] text-dark-400 mt-1">Use this to recover dropped votes.</p>
                  </div>
                  <div><label className="form-label">Bio / Reason</label><textarea className="form-input" rows={3} value={editingNominee.bio || ''} onChange={e => setEditingNominee({...editingNominee, bio: e.target.value})} /></div>
                  <div className="flex items-center gap-2 pt-2">
