@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Nomination, Category } from '@/lib/types';
 import { generateNomineeCode } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Loader2, Check, X, UserPlus, Eye } from 'lucide-react';
+import { Loader2, Check, X, UserPlus, Eye, Search } from 'lucide-react';
 
 import { sendSMS } from '@/app/actions/sms';
 
@@ -13,6 +13,7 @@ export default function AdminNominations() {
   const [nominations, setNominations] = useState<Nomination[]>([]);
   const [existingNominees, setExistingNominees] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedNomination, setSelectedNomination] = useState<Nomination | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [isSendingSMS, setIsSendingSMS] = useState(false);
@@ -143,11 +144,27 @@ export default function AdminNominations() {
     }
   };
 
+  const filteredNominations = nominations.filter(n => 
+    n.nominee_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (n.nominee_phone && n.nominee_phone.includes(searchQuery))
+  );
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-dark-100">Nominations</h1>
-        <p className="text-dark-400 text-sm">Review public submissions and convert them to official nominees.</p>
+      <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-dark-100">Nominations</h1>
+          <p className="text-dark-400 text-sm">Review public submissions and convert them to official nominees.</p>
+        </div>
+        <div className="relative w-full md:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
+          <input 
+            className="form-input pl-10 text-sm py-2 w-full" 
+            placeholder="Search by name or phone..." 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+          />
+        </div>
       </div>
 
       <div className="glass-card border border-dark-800 overflow-hidden">
@@ -166,10 +183,10 @@ export default function AdminNominations() {
             <tbody>
               {loading ? (
                 <tr><td colSpan={6} className="text-center py-8"><Loader2 className="w-6 h-6 text-gold-400 animate-spin mx-auto" /></td></tr>
-              ) : nominations.length === 0 ? (
+              ) : filteredNominations.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-8 text-dark-400">No nominations found.</td></tr>
               ) : (
-                nominations.map(n => (
+                filteredNominations.map(n => (
                   <tr key={n.id}>
                     <td>
                       <p className="font-medium text-dark-100">{n.nominee_name}</p>
