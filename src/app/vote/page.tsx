@@ -115,10 +115,10 @@ export default function VotePage() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
                   <input className="form-input pl-10" placeholder="Search nominees..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeCategory === 'all' ? 'bg-gold-500 text-dark-950' : 'glass-card-light text-dark-300 hover:text-gold-400'}`}>All</button>
+                <div className="flex gap-2 overflow-x-auto pb-2 snap-x hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <button onClick={() => setActiveCategory('all')} className={`whitespace-nowrap snap-start px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeCategory === 'all' ? 'bg-gold-500 text-dark-950' : 'glass-card-light text-dark-300 hover:text-gold-400'}`}>All</button>
                   {categories.map(c => (
-                    <button key={c.id} onClick={() => setActiveCategory(c.id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeCategory === c.id ? 'bg-gold-500 text-dark-950' : 'glass-card-light text-dark-300 hover:text-gold-400'}`}>{c.name}</button>
+                    <button key={c.id} onClick={() => setActiveCategory(c.id)} className={`whitespace-nowrap snap-start px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeCategory === c.id ? 'bg-gold-500 text-dark-950' : 'glass-card-light text-dark-300 hover:text-gold-400'}`}>{c.name}</button>
                   ))}
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function VotePage() {
       {/* Vote Modal */}
       {selectedNominee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
-          <div className="glass-card p-6 sm:p-8 max-w-md w-full relative" style={{ borderColor: 'rgba(234,179,8,0.3)' }}>
+          <div className="glass-card p-6 sm:p-8 max-w-md w-full relative max-h-[90vh] overflow-y-auto" style={{ borderColor: 'rgba(234,179,8,0.3)' }}>
             <button onClick={() => { setSelectedNominee(null); setProcessing(false); }} className="absolute top-4 right-4 text-dark-400 hover:text-dark-200"><X className="w-5 h-5" /></button>
             <div className="text-center mb-6">
               <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden bg-dark-800">

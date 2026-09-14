@@ -15,25 +15,26 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav className="flex items-center gap-0.5 sm:gap-2">
             <Link
               href="/nominate"
-              className="px-3 py-2 text-sm font-medium text-dark-300 hover:text-gold-400 transition-colors rounded-lg hover:bg-white/5"
+              className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-dark-300 hover:text-gold-400 transition-colors rounded-lg hover:bg-white/5"
             >
               Nominate
             </Link>
             <Link
               href="/vote"
-              className="px-3 py-2 text-sm font-medium text-dark-300 hover:text-gold-400 transition-colors rounded-lg hover:bg-white/5"
+              className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-dark-300 hover:text-gold-400 transition-colors rounded-lg hover:bg-white/5"
             >
               Vote
             </Link>
 
             <Link
               href="/nominee-portal"
-              className="gold-btn-outline !py-2 !px-4 !text-xs"
+              className="gold-btn-outline !py-1.5 sm:!py-2 !px-3 sm:!px-4 !text-[10px] sm:!text-xs ml-1 sm:ml-0"
             >
-              Nominee Portal
+              <span className="sm:hidden">Portal</span>
+              <span className="hidden sm:inline">Nominee Portal</span>
             </Link>
           </nav>
         </div>

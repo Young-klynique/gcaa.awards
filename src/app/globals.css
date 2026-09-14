@@ -268,6 +268,15 @@ body {
   background: var(--color-dark-600);
 }
 
+/* Hide scrollbar for horizontal scrolling lists */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Admin table styles */
 .admin-table {
   width: 100%;
