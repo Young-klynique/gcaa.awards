@@ -266,8 +266,17 @@ export default function AdminNominations() {
                    const isDuplicate = existingNominees.has(nameKey) || (phoneKey && existingNominees.has(phoneKey));
                    
                    return isDuplicate ? (
-                     <button disabled className="flex-1 py-2 px-4 rounded-lg bg-dark-800 text-dark-400 font-medium border border-dark-700 cursor-not-allowed">
-                       Already Official Nominee
+                     <button 
+                       onClick={() => {
+                         if (window.confirm('A nominee with this name or phone already exists in the system. Are you sure you want to create a duplicate?')) {
+                           convertToNominee(selectedNomination);
+                         }
+                       }} 
+                       disabled={isConverting}
+                       className="flex-1 py-2 px-4 rounded-lg bg-orange-500/20 text-orange-400 font-medium border border-orange-500/30 flex items-center justify-center gap-2"
+                     >
+                       {isConverting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                       Force Create (Duplicate)
                      </button>
                    ) : (
                      <button 
