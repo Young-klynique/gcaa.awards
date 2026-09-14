@@ -16,7 +16,6 @@ export default function FlyerGenerator() {
   const flyerRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
-  // Layout State
   const [layout, setLayout] = useState({
     photo: { top: 31, height: 26, width: 62, borderRadius: 150 },
     category: { show: false, top: 22.5, fontSize: 24, color: '#ffffff' },
@@ -26,7 +25,7 @@ export default function FlyerGenerator() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('nominees').select(&*, category:categories(*)').eq('is_active', true).order('name');
+      const { data } = await supabase.from('nominees').select('*, category:categories(*)').eq('is_active', true).order('name');
       if (data) setNominees(data as Nominee[]);
       setLoading(false);
     }
@@ -34,7 +33,7 @@ export default function FlyerGenerator() {
   }, []);
 
   const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?[0];
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => setBgImage(event.target?.result as string);
@@ -45,15 +44,10 @@ export default function FlyerGenerator() {
   const downloadFlyer = async () => {
     if (!flyerRef.current || !selectedNominee || !bgImage) return;
     setGenerating(true);
-
     try {
       const canvas = await html2canvas(flyerRef.current, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: null
+        scale: 2, useCORS: true, allowTaint: false, backgroundColor: null
       });
-
       const image = canvas.toDataURL('image/jpeg', 0.9);
       const link = document.createElement('a');
       link.href = image;
@@ -77,22 +71,20 @@ export default function FlyerGenerator() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
+        
         {/* Controls */}
         <div className="lg:col-span-5 space-y-6">
           <div className="glass-card p-6 space-y-4">
             <h2 className="font-bold text-lg text-gold-400 flex items-center gap-2"><ImageIcon className="w-5 h-5"/> 1. Setup Base</h2>
-
             <div>
               <label className="form-label">Blank Background Template</label>
-              <input type="file" accept="image/*" onChange={handleBgUpload} className="form-input text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:bg-gold-500 file:text-dark-950 hover:file:bg-gold-400" />
+              <input type="file" accept="image/*" onChange={handleBgUpload} className="form-input text-sm" />
             </div>
-
             <div>
               <label className="form-label">Select Nominee to Render</label>
               <select className="form-select" onChange={e => setSelectedNominee(nominees.find(n => n.id === e.target.value) || null)}>
                 <option value="">-- Choose a Nominee --</option>
-                {nominees.map(n => <option key={n.id} value={n.id}>{n.name} ({(n.category as any)?.name})</option<)}
+                {nominees.map(n => <option key={n.id} value={n.id}>{n.name} ({(n.category as any)?.name})</option>)}
               </select>
             </div>
           </div>
@@ -100,7 +92,7 @@ export default function FlyerGenerator() {
           {bgImage && selectedNominee && (
             <div className="glass-card p-6 space-y-6">
               <h2 className="font-bold text-lg text-gold-400 flex items-center gap-2"><Settings2 className="w-5 h-5"/> 2. Adjust Positions</h2>
-
+              
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-dark-800 pb-2">
                   <h3 className="text-sm font-bold text-dark-200">Category Text</h3>
@@ -111,22 +103,36 @@ export default function FlyerGenerator() {
                 </div>
                 {layout.category.show && (
                   <div className="flex gap-4">
-                    <div className="flex-1"><label className="text-xs text-dark-400">Position (Top %)</label><input type="range" min="0" max="100" step="0.5" value={layout.category.top} onChange={e =>͕�1���С츸�����а���ѕ�����츸�����й��ѕ���䰁ѽ�����͕���С��хɝ�йم�Ք����􁍱���9����ܵ�ձ�������е������������𽑥��(���������������������؁�����9����ܴ�Ј�񱅉��������9����ѕ�е�́ѕ�е��ɬ������M�销���𽱅�������Ё�����յ��Ȉ�م�Ք������й��ѕ���乙���M��􁽹������픀���]^[�]
-ˋ��^[�]�]Y�ܞN�ˋ��^[�]��]Y�ܞK�۝�^�N�\��R[�
-K�\��]��[YJ__J_H�\�Ә[YOH��ܛKZ[�]\KLH\L�^^ȈϏ�]����]���
-_B��]����]��\�Ә[YOH��X�K^KM�����\�Ә[YOH�^\�H�۝X��^Y\��L��ܙ\�X��ܙ\�Y\��N�L�����Z[�YH���ς�]��\�Ә[YOH��^�\M���]��\�Ә[YOH��^LH��X�[�\�Ә[YOH�^^�^Y\��M����][ۈ
-�	JO�X�[�[�]\OH��[��H�Z[�H��X^H�L��\H��H��[YO^�^[�]��˝�Hې�[��O^�HO��]^[�]
-ˋ��^[�]�Έˋ��^[�]�����\��Q��]
-K�\��]��[YJ__J_H�\�Ә[YOH��Y�[X��[�Y��ML�Ϗ�]���]��\�Ә[YOH��L���X�[�\�Ә[YOH�^^�^Y\��M��ZY�	O�X�[�[�]\OH��[X�\���[YO^�^[�]��˚ZY�Hې�[��O^�HO��]^[�]
-ˋ��^[�]�Έˋ��^[�]���ZY��\��R[�
-K�\��]��[YJ__J_H�\�Ә[YOH��ܛKZ[�]\KLH\L�^^ȈϏ�]����]���]��\�Ә[YOH��^�\M���]��\�Ә[YOH��^LH��X�[�\�Ә[YOH�^^�^Y\��M���Y	O�X�[�[�]\OH��[��H�Z[�H�L�X^H�L��[YO^�^[�]��˝�YHې�[��O^�HO�͕�1���С츸�����а����Ѽ�츸�����й���Ѽ��ݥ�Ѡ����͕%�С��хɝ�йم�Ք����􁍱���9����ܵ�ձ�������е������������𽑥��(�������������������؁�����9����ܴ�Ј�񱅉��������9����ѕ�е�́ѕ�е��ɬ������I�չ����𽱅�������Ё�����յ��Ȉ�م�Ք������й���Ѽ���ɑ��I�����􁽹������픀���͕�1���С츸�����а����Ѽ�츸�����й���Ѽ����ɑ��I���������͕%�С��хɝ�йم�Ք����􁍱���9���􉙽ɴ�����Ѐ���Ā���ȁѕ�е�̈���𽑥��(����������������𽑥��(��������������𽑥��((���������������؁�����9�����������Ј�(�����������������́�����9����ѕ�еʹ����е�����ѕ�е��ɬ�������ɑ�ȵ����ɑ�ȵ��ɬ��������Ȉ�9�������9������(�����������������؁�����9���􉙱�������Ј�(�������������������؁�����9���􉙱��Ĉ�񱅉��������9����ѕ�е�́ѕ�е��ɬ������A�ͥѥ����Q�����𽱅�������Ё�����Ʌ����������������������ѕ����Ԉ�م�Ք������й�����ѽ�􁽹������픀���]^[�]
-ˋ��^[�]�[YN�ˋ��^[�]��[YK��\��Q��]
-K�\��]��[YJ__J_H�\�Ә[YOH��Y�[X��[�Y��ML�Ϗ�]���]��\�Ә[YOH��L���X�[�\�Ә[YOH�^^�^Y\��M���^�H
-
-O�X�[�[�]\OH��[X�\���[YO^�^[�]��[YK��۝�^�_Hې�[��O^�HO��]^[�]
-ˋ��^[�]�[YN�ˋ��^[�]��[YK�۝�^�N�\��R[�
-K�\��]��[YJ__J_H�\�Ә[YOH��ܛKZ[�]\KLH\L�^^ȈϏ�]����]����]����]��\�Ә[YOH��X�K^KM�����\�Ә[YOH�^\�H�۝X��^Y\��L��ܙ\�X��ܙ\�Y\��N�L�����[����O�ς�]��\�Ә[YOH��^�\M���]��\�Ә[YOH��^LH��X�[�\�Ә[YOH�^^�^Y\��M����][ۈ
-�	JO�X�[�[�]\OH��[��H�Z[�H��X^H�L��\H��H��[YO^�^[�]���K��Hې�[��O^�HO�setLayout({...layout, code: {...layout.code, top: parseFloat(e.target.value)}})} className="w-full accent-gold-500" /></div>
+                    <div className="flex-1"><label className="text-xs text-dark-400">Position (Top %)</label><input type="range" min="0" max="100" step="0.5" value={layout.category.top} onChange={e => setLayout({...layout, category: {...layout.category, top: parseFloat(e.target.value)}})} className="w-full accent-gold-500" /></div>
+                    <div className="w-24"><label className="text-xs text-dark-400">Size (px)</label><input type="number" value={layout.category.fontSize} onChange={e => setLayout({...layout, category: {...layout.category, fontSize: parseInt(e.target.value)}})} className="form-input !py-1 !px-2 text-xs" /></div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-dark-200 border-b border-dark-800 pb-2">Nominee Photo</h3>
+                <div className="flex gap-4">
+                  <div className="flex-1"><label className="text-xs text-dark-400">Position (Top %)</label><input type="range" min="0" max="100" step="0.5" value={layout.photo.top} onChange={e => setLayout({...layout, photo: {...layout.photo, top: parseFloat(e.target.value)}})} className="w-full accent-gold-500" /></div>
+                  <div className="w-24"><label className="text-xs text-dark-400">Height %</label><input type="number" value={layout.photo.height} onChange={e => setLayout({...layout, photo: {...layout.photo, height: parseInt(e.target.value)}})} className="form-input !py-1 !px-2 text-xs" /></div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1"><label className="text-xs text-dark-400">Width %</label><input type="range" min="10" max="100" value={layout.photo.width} onChange={e => setLayout({...layout, photo: {...layout.photo, width: parseInt(e.target.value)}})} className="w-full accent-gold-500" /></div>
+                  <div className="w-24"><label className="text-xs text-dark-400">Rounding</label><input type="number" value={layout.photo.borderRadius} onChange={e => setLayout({...layout, photo: {...layout.photo, borderRadius: parseInt(e.target.value)}})} className="form-input !py-1 !px-2 text-xs" /></div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-dark-200 border-b border-dark-800 pb-2">Nominee Name</h3>
+                <div className="flex gap-4">
+                  <div className="flex-1"><label className="text-xs text-dark-400">Position (Top %)</label><input type="range" min="0" max="100" step="0.5" value={layout.name.top} onChange={e => setLayout({...layout, name: {...layout.name, top: parseFloat(e.target.value)}})} className="w-full accent-gold-500" /></div>
+                  <div className="w-24"><label className="text-xs text-dark-400">Size (px)</label><input type="number" value={layout.name.fontSize} onChange={e => setLayout({...layout, name: {...layout.name, fontSize: parseInt(e.target.value)}})} className="form-input !py-1 !px-2 text-xs" /></div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-dark-200 border-b border-dark-800 pb-2">Voting Code</h3>
+                <div className="flex gap-4">
+                  <div className="flex-1"><label className="text-xs text-dark-400">Position (Top %)</label><input type="range" min="0" max="100" step="0.5" value={layout.code.top} onChange={e => setLayout({...layout, code: {...layout.code, top: parseFloat(e.target.value)}})} className="w-full accent-gold-500" /></div>
                   <div className="w-24"><label className="text-xs text-dark-400">Size (px)</label><input type="number" value={layout.code.fontSize} onChange={e => setLayout({...layout, code: {...layout.code, fontSize: parseInt(e.target.value)}})} className="form-input !py-1 !px-2 text-xs" /></div>
                 </div>
               </div>
@@ -135,19 +141,13 @@ O�X�[�[�]\OH��[X�\���[YO^�^[�]��[YK��
           )}
         </div>
 
-        
-{/* Live Preview */}
+        {/* Live Preview */}
         <div className="lg:col-span-7">
           <div className="sticky top-24">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-lg text-dark-100">Live Preview</h2>
-              <button 
-                onClick={downloadFlyer} 
-                disabled={!bgImage || !selectedNominee || generating}
-                className="gold-btn !py-2 !px-4 !text-sm flex items-center gap-2"
-              >
-                {generating ? <Loader2 className="w-4 h-4 animate-spin"/> : <Download className="w-4 h-4"/>}
-                Download Flyer
+              <button onClick={downloadFlyer} disabled={!bgImage || !selectedNominee || generating} className="gold-btn !py-2 !px-4 !text-sm flex items-center gap-2">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin"/> : <Download className="w-4 h-4"/>} Download Flyer
               </button>
             </div>
             
@@ -157,68 +157,41 @@ O�X�[�[�]\OH��[X�\���[YO^�^[�]��[YK��
               ) : !selectedNominee ? (
                 <p className="text-dark-500 text-sm">Select a nominee to render</p>
               ) : (
-                <div 
-                  ref={flyerRef}
-                  className="relative mx-auto bg-white shadow-2xl"
-                  style={{ width: '100%', maxWidth: '500px', aspectRatio: '9/16' }}
-                >
+                <div ref={flyerRef} className="relative mx-auto bg-white shadow-2xl" style={{ width: '100%', maxWidth: '500px', aspectRatio: '9/16' }}>
                   <img src={bgImage} alt="Background" className="absolute inset-0 w-full h-full object-cover z-0" crossOrigin="anonymous" />
                   
-                  {/* Category */}
                   {layout.category.show && (
-                    <div className="absolute left-0 right-0 text-center z-10" style={{ top: `${layout.category.top}%`}}>
+                    <div className="absolute left-0 right-0 text-center z-10" style={{ top: `${layout.category.top}%` }}>
                       <span style={{ fontSize: `${layout.category.fontSize}px`, color: layout.category.color, fontFamily: 'Arial, sans-serif', fontWeight: 800, textTransform: 'uppercase' }}>
                         {(selectedNominee.category as any)?.name}
                       </span>
                     </div>
                   )}
 
-                  {/* Photo Container */}
-                  <div 
-                    className="absolute z-10 overflow-hidden flex items-center justify-center bg-gray-200"
+                  <div className="absolute z-10 overflow-hidden flex items-center justify-center bg-gray-200"
                     style={{ 
-                      top: `${layout.photo.top%`, 
-                      left: `${(100 - layout.photo.width) / 2}%`,
-                      width: `${layout.photo.width}%`,
-                      height: `${layout.photo.height}%`,
-                      borderTopLeftRadius: `${layout.photo.borderRadius}px`,
-                      borderTopRightRadius: `${layout.photo.borderRadius}px`,
-                      borderBottomLeftRadius: '10px',
-                      borderBottomRightRadius: '10px',
-                    }}
-                  >
+                      top: `${layout.photo.top}%`, left: `${(100 - layout.photo.width) / 2}%`, width: `${layout.photo.width}%`, height: `${layout.photo.height}%`,
+                      borderTopLeftRadius: `${layout.photo.borderRadius}px`, borderTopRightRadius: `${layout.photo.borderRadius}px`, borderBottomLeftRadius: '10px', borderBottomRightRadius: '10px',
+                    }}>
                     {selectedNominee.photo_url ? (
-                      <img 
-                        src={`/api/admin/proxy-image?url=${encodeURIComponent(selectedNominee.photo_url)}`} 
-                        alt="Nominee" 
-                        className="w-full h-full object-cover" 
-                        crossOrigin="anonymous" 
-                      />
+                      <img src={`/api/admin/proxy-image?url=${encodeURIComponent(selectedNominee.photo_url)}`} alt="Nominee" className="w-full h-full object-cover" crossOrigin="anonymous" />
                     ) : (
                       <span className="text-gray-400 text-sm">No Photo</span>
                     )}
                   </div>
 
-                  {/* Name */}
-                  <div className="absolute left-0 right-0 text-center z-10 px-4" style={{ top: `${layout.name.top}%`}}>
-                    <span style=+{{ fontSize: `${layout.name.fontSize}px`, color: layout.name.color, fontFamily: 'Georgia, serif', fontWeight: 900, textTransform: 'uppercase' }}>
-                      {selectedNominee.name}
-                    </span>
+                  <div className="absolute left-0 right-0 text-center z-10 px-4" style={{ top: `${layout.name.top}%` }}>
+                    <span style={{ fontSize: `${layout.name.fontSize}px`, color: layout.name.color, fontFamily: 'Georgia, serif', fontWeight: 900, textTransform: 'uppercase' }}>{selectedNominee.name}</span>
                   </div>
 
-                  {/* Code */}
-                  <div className="absolute left-0 right-0 text-center z-10" style={{ top: `${layout.code.top}%`}}>
-                    <span style={{ fontSize: `${layout.code.fontSize}px`, color: layout.code.color, fontFamily: 'Arial, sans-serif', fontWeight: 900 }}>
-                      {selectedNominee.code}
-                    </span>
+                  <div className="absolute left-0 right-0 text-center z-10" style={{ top: `${layout.code.top}%` }}>
+                    <span style={{ fontSize: `${layout.code.fontSize}px`, color: layout.code.color, fontFamily: 'Arial, sans-serif', fontWeight: 900 }}>{selectedNominee.code}</span>
                   </div>
-
                 </div>
               )}
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
