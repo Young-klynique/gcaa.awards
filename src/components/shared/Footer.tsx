@@ -15,7 +15,7 @@ export default function Footer() {
               <span className="font-display text-lg font-bold gold-text">Awards Night</span>
             </div>
             <p className="text-dark-400 text-sm leading-relaxed">
-              Celebrating excellence and honoring outstanding individuals at our prestigious Awards & Dinner Night.
+              Celebrating excellence and honoring outstanding individuals at our prestigious Awards & Movie Day.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ export default function Footer() {
 
         <div className="border-t border-dark-800/50 mt-8 pt-6 text-center">
           <p className="text-dark-500 text-xs flex items-center justify-center gap-1">
-            Made with <Heart className="w-3 h-3 text-red-400 fill-red-400" /> for Awards & Dinner Night 2026
+            Made with <Heart className="w-3 h-3 text-red-400 fill-red-400" /> for Awards & Movie Day 2026
           </p>
         </div>
       </div>

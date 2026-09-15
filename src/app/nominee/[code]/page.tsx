@@ -82,7 +82,7 @@ export default function NomineeDashboard({ params }: { params: Promise<{ code: s
       try {
         await navigator.share({
           title: `Vote for ${nominee?.name}`,
-          text: `Support me for ${(nominee?.category as unknown as Category)?.name} at the Awards & Dinner Night 2026!`,
+          text: `Support me for ${(nominee?.category as unknown as Category)?.name} at the Awards & Movie Day 2026!`,
           url: url,
         });
       } catch (err) {
