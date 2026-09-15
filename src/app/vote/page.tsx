@@ -141,8 +141,7 @@ export default function VotePage() {
                         <p className="text-dark-500 text-[9px] sm:text-xs uppercase tracking-wider mb-2 sm:mb-3 truncate">{(nominee.category as unknown as Category)?.name || 'Category'}</p>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mt-auto">
-                        <span className="text-gold-400 font-bold text-[11px] sm:text-sm">{nominee.vote_count} votes</span>
-                        <button onClick={() => setSelectedNominee(nominee)} className="gold-btn !py-1.5 sm:!py-2 !px-2 sm:!px-4 !text-[10px] sm:!text-xs w-full sm:w-auto text-center">Vote</button>
+                        <button onClick={() => setSelectedNominee(nominee)} className="gold-btn !py-1.5 sm:!py-2 !px-2 sm:!px-4 !text-[10px] sm:!text-xs w-full sm:w-auto text-center ml-auto">Vote</button>
                       </div>
                     </div>
                   </div>

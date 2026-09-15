@@ -43,6 +43,7 @@ export default function AdminSettings() {
       event_name: settings.event_name,
       allow_multiple_votes: settings.allow_multiple_votes,
       max_votes_per_person: settings.max_votes_per_person,
+      show_nominee_votes: settings.show_nominee_votes !== undefined ? settings.show_nominee_votes : true,
       nomination_start: formatForDB(settings.nomination_start),
       nomination_end: formatForDB(settings.nomination_end),
       voting_start: formatForDB(settings.voting_start),
@@ -52,7 +53,14 @@ export default function AdminSettings() {
     const { error } = await supabase.from('event_settings').update(updates).eq('id', settings.id);
     
     setSaving(false);
-    if (error) { toast.error('Failed to save settings'); return; }
+    if (error) { 
+      if (error.message.includes('show_nominee_votes')) {
+        toast.error('Database column missing! Please run this in your Supabase SQL Editor: ALTER TABLE event_settings ADD COLUMN show_nominee_votes BOOLEAN DEFAULT true;');
+      } else {
+        toast.error('Failed to save settings: ' + error.message); 
+      }
+      return; 
+    }
     toast.success('Event settings updated successfully');
   };
 
@@ -73,6 +81,20 @@ export default function AdminSettings() {
            <div className="max-w-md">
              <label className="form-label">Event Name</label>
              <input required className="form-input" value={settings.event_name} onChange={e => setSettings({...settings, event_name: e.target.value})} />
+           </div>
+        </div>
+
+        {/* Visibility */}
+        <div className="glass-card p-6 border border-dark-800">
+           <h2 className="text-lg font-bold text-dark-100 mb-4 border-b border-dark-800/50 pb-2">Suspense & Visibility</h2>
+           <div className="col-span-full">
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="showVotes" checked={settings.show_nominee_votes !== false} onChange={e => setSettings({...settings, show_nominee_votes: e.target.checked})} className="w-5 h-5 accent-gold-500 rounded bg-dark-800" />
+                <label htmlFor="showVotes" className="text-sm text-dark-200">
+                  <strong className="block mb-1 text-gold-400">Show votes in Nominee Portal</strong>
+                  Allow nominees to see their live vote count and leaderboard position. Turn this off near the end of the competition to build suspense!
+                </label>
+              </div>
            </div>
         </div>
 

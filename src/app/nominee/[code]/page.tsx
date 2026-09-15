@@ -15,8 +15,14 @@ export default function NomineeDashboard({ params }: { params: Promise<{ code: s
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  const [settings, setSettings] = useState<any>(null);
+
   useEffect(() => {
     async function loadData() {
+      // Fetch settings
+      const { data: setRes } = await supabase.from('event_settings').select('*').single();
+      setSettings(setRes);
+
       // Fetch the specific nominee
       const { data: nomData, error: nomErr } = await supabase
         .from('nominees')
@@ -95,6 +101,9 @@ export default function NomineeDashboard({ params }: { params: Promise<{ code: s
   const rank = leaderboard.findIndex(n => n.id === nominee.id) + 1;
   const totalCategoryVotes = leaderboard.reduce((sum, n) => sum + n.vote_count, 0);
   const votePercentage = totalCategoryVotes > 0 ? ((nominee.vote_count / totalCategoryVotes) * 100).toFixed(1) : '0.0';
+  
+  // Conditionally hide votes based on settings (defaults to true if undefined)
+  const showVotes = settings?.show_nominee_votes !== false;
 
   return (
     <div className="min-h-screen flex flex-col gradient-bg">
@@ -118,71 +127,93 @@ export default function NomineeDashboard({ params }: { params: Promise<{ code: s
                 <Share2 className="w-4 h-4" /> Share My Voting Link
               </button>
             </div>
-            <div className="flex gap-4 md:flex-col md:border-l border-dark-800/50 md:pl-8">
-              <div className="text-center">
-                <p className="text-dark-500 text-xs uppercase tracking-wider mb-1">Total Votes</p>
-                <p className="font-display text-4xl font-bold gold-text pulse-gold">{nominee.vote_count}</p>
+            
+            {showVotes && (
+              <div className="flex gap-4 md:flex-col md:border-l border-dark-800/50 md:pl-8">
+                <div className="text-center">
+                  <p className="text-dark-500 text-xs uppercase tracking-wider mb-1">Total Votes</p>
+                  <p className="font-display text-4xl font-bold gold-text pulse-gold">{nominee.vote_count}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-dark-500 text-xs uppercase tracking-wider mb-1">Current Rank</p>
+                  <p className="font-display text-2xl font-bold text-dark-100 flex items-center justify-center gap-1">
+                    <Trophy className={`w-5 h-5 ${rank === 1 ? 'text-gold-400' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-600' : 'text-dark-500'}`} />
+                    #{rank}
+                  </p>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-dark-500 text-xs uppercase tracking-wider mb-1">Current Rank</p>
-                <p className="font-display text-2xl font-bold text-dark-100 flex items-center justify-center gap-1">
-                  <Trophy className={`w-5 h-5 ${rank === 1 ? 'text-gold-400' : rank === 2 ? 'text-gray-400' : rank === 3 ? 'text-amber-600' : 'text-dark-500'}`} />
-                  #{rank}
-                </p>
+            )}
+            
+            {!showVotes && (
+              <div className="flex gap-4 md:flex-col md:border-l border-dark-800/50 md:pl-8">
+                <div className="text-center">
+                  <p className="text-dark-500 text-xs uppercase tracking-wider mb-1">Status</p>
+                  <p className="font-display text-lg font-bold text-dark-100">Hidden for Suspense!</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Detailed Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-             <div className="glass-card p-6">
-                <h3 className="font-display text-xl font-bold text-dark-100 mb-4 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-gold-400" /> Vote Analysis
-                </h3>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-dark-300">Category Share</span>
-                      <span className="text-gold-400 font-bold">{votePercentage}%</span>
-                    </div>
-                    <div className="vote-progress">
-                      <div className="vote-progress-bar" style={{ width: `${votePercentage}%` }} />
-                    </div>
-                  </div>
-                  <div className="pt-4 border-t border-dark-800/50">
-                     <p className="text-sm text-dark-400">You need <strong className="text-dark-100">{rank === 1 ? '0' : (leaderboard[0]?.vote_count - nominee.vote_count + 1) || 0}</strong> more votes to take the #1 spot.</p>
-                  </div>
-                </div>
-             </div>
-
-             {/* Leaderboard */}
-             <div className="glass-card p-6">
-                <h3 className="font-display text-xl font-bold text-dark-100 mb-4 flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-gold-400" /> Category Leaderboard
-                </h3>
-                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                  {leaderboard.map((n, idx) => (
-                    <div key={n.id} className={`flex items-center justify-between p-3 rounded-lg ${n.id === nominee.id ? 'bg-gold-500/10 border border-gold-500/20' : 'bg-dark-800/50'}`}>
-                      <div className="flex items-center gap-3">
-                        <span className={`font-bold w-5 text-center ${idx === 0 ? 'text-gold-400' : idx === 1 ? 'text-gray-400' : idx === 2 ? 'text-amber-600' : 'text-dark-500'}`}>
-                          {idx + 1}
-                        </span>
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-dark-700 flex-shrink-0">
-                          {n.photo_url ? <img src={n.photo_url} alt="" className="w-full h-full object-cover" /> : <User className="w-full h-full p-1 text-dark-500" />}
-                        </div>
-                        <div>
-                           <p className={`text-sm font-medium ${n.id === nominee.id ? 'text-gold-400' : 'text-dark-200'}`}>
-                             {n.id === nominee.id ? 'You' : n.name}
-                           </p>
-                           <p className="text-xs text-dark-500">{n.code}</p>
-                        </div>
+          {showVotes ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="glass-card p-6">
+                  <h3 className="font-display text-xl font-bold text-dark-100 mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-gold-400" /> Vote Analysis
+                  </h3>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-dark-300">Category Share</span>
+                        <span className="text-gold-400 font-bold">{votePercentage}%</span>
                       </div>
-                      <span className="font-bold text-dark-100">{n.vote_count}</span>
+                      <div className="vote-progress">
+                        <div className="vote-progress-bar" style={{ width: `${votePercentage}%` }} />
+                      </div>
                     </div>
-                  ))}
-                </div>
-             </div>
-          </div>
+                    <div className="pt-4 border-t border-dark-800/50">
+                       <p className="text-sm text-dark-400">You need <strong className="text-dark-100">{rank === 1 ? '0' : (leaderboard[0]?.vote_count - nominee.vote_count + 1) || 0}</strong> more votes to take the #1 spot.</p>
+                    </div>
+                  </div>
+               </div>
+  
+               {/* Leaderboard */}
+               <div className="glass-card p-6">
+                  <h3 className="font-display text-xl font-bold text-dark-100 mb-4 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-gold-400" /> Category Leaderboard
+                  </h3>
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                    {leaderboard.map((n, idx) => (
+                      <div key={n.id} className={`flex items-center justify-between p-3 rounded-lg ${n.id === nominee.id ? 'bg-gold-500/10 border border-gold-500/20' : 'bg-dark-800/50'}`}>
+                        <div className="flex items-center gap-3">
+                          <span className={`font-bold w-5 text-center ${idx === 0 ? 'text-gold-400' : idx === 1 ? 'text-gray-400' : idx === 2 ? 'text-amber-600' : 'text-dark-500'}`}>
+                            {idx + 1}
+                          </span>
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-dark-700 flex-shrink-0">
+                            {n.photo_url ? <img src={n.photo_url} alt="" className="w-full h-full object-cover" /> : <User className="w-full h-full p-1 text-dark-500" />}
+                          </div>
+                          <div>
+                             <p className={`text-sm font-medium ${n.id === nominee.id ? 'text-gold-400' : 'text-dark-200'}`}>
+                               {n.id === nominee.id ? 'You' : n.name}
+                             </p>
+                             <p className="text-xs text-dark-500">{n.code}</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-dark-100">{n.vote_count}</span>
+                      </div>
+                    ))}
+                  </div>
+               </div>
+            </div>
+          ) : (
+            <div className="glass-card p-10 text-center">
+              <Trophy className="w-16 h-16 text-gold-400/50 mx-auto mb-4" />
+              <h2 className="font-display text-2xl font-bold text-dark-100 mb-2">Voting Results Hidden</h2>
+              <p className="text-dark-400 text-lg">
+                The competition is heating up! We have temporarily hidden the voting results to build suspense for the main event. Keep sharing your link and encouraging your fans to vote!
+              </p>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

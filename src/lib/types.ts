@@ -9,6 +9,7 @@ export interface EventSettings {
   vote_cost_pesewas: number;
   allow_multiple_votes: boolean;
   max_votes_per_person: number;
+  show_nominee_votes?: boolean;
   created_at: string;
   updated_at: string;
 }
