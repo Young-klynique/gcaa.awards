@@ -19,7 +19,7 @@ export default function NominatePage() {
   const [form, setForm] = useState({
     nominator_name: '', nominator_phone: '', nominator_email: '',
     nominee_name: '', nominee_phone: '', nominee_email: '',
-    category_id: '', reason: '',
+    category_id: '', reason: '', department_name: ''
   });
 
   const supabase = createClient();
@@ -37,16 +37,29 @@ export default function NominatePage() {
     load();
   }, []);
 
+  const selectedCategory = categories.find(c => c.id === form.category_id);
+  const isBestDepartment = selectedCategory?.name.toLowerCase().includes('best department');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isNominationOpen(settings)) { toast.error('Nominations are currently closed'); return; }
     if (!form.category_id || !form.nominee_name) {
       toast.error('Please fill in all required fields'); return;
     }
+    if (isBestDepartment && !form.department_name) {
+      toast.error('Please enter the department name'); return;
+    }
+
     setSubmitting(true);
+    
+    // Append department to nominee name if applicable
+    const finalNomineeName = isBestDepartment 
+      ? `${form.nominee_name} (${form.department_name})`
+      : form.nominee_name;
+
     const { error } = await supabase.from('nominations').insert({
       category_id: form.category_id,
-      nominee_name: form.nominee_name, nominee_phone: form.nominee_phone, nominee_email: form.nominee_email,
+      nominee_name: finalNomineeName, nominee_phone: form.nominee_phone, nominee_email: form.nominee_email,
       nominator_name: 'Anonymous', nominator_phone: null, nominator_email: null,
       reason: form.reason,
     });
@@ -57,7 +70,7 @@ export default function NominatePage() {
   };
 
   const resetForm = () => {
-    setForm({ nominator_name: '', nominator_phone: '', nominator_email: '', nominee_name: '', nominee_phone: '', nominee_email: '', category_id: '', reason: '' });
+    setForm({ nominator_name: '', nominator_phone: '', nominator_email: '', nominee_name: '', nominee_phone: '', nominee_email: '', category_id: '', reason: '', department_name: '' });
     setSubmitted(false);
   };
 
@@ -129,6 +142,21 @@ export default function NominatePage() {
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
+                
+                {isBestDepartment && (
+                  <div className="mt-4 p-4 border border-gold-500/30 bg-gold-500/5 rounded-lg">
+                    <label className="form-label text-gold-400">Department Name *</label>
+                    <input 
+                      className="form-input" 
+                      required 
+                      value={form.department_name} 
+                      onChange={e => setForm({...form, department_name: e.target.value})} 
+                      placeholder="e.g. IT, HR, Marketing" 
+                    />
+                    <p className="text-xs text-dark-400 mt-1">Required for the Best Department category.</p>
+                  </div>
+                )}
+                
                 <div className="mt-4"><label className="form-label">Reason for Nomination</label>
                   <textarea className="form-input" rows={4} value={form.reason} onChange={e => setForm({...form, reason: e.target.value})} placeholder="Why do you think this person deserves this award?" />
                 </div>
