@@ -10,53 +10,66 @@ export async function POST() {
 
     const supabaseAdmin = createAdminClient();
 
-    // Fetch successful transactions from Paystack (fetch last 100)
-    const paystackRes = await fetch('https://api.paystack.co/transaction?status=success&perPage=100', {
-      headers: { Authorization: `Bearer ${secret}` },
-    });
-    
-    if (!paystackRes.ok) {
-      return NextResponse.json({ error: 'Failed to communicate with Paystack' }, { status: 500 });
-    }
-
-    const paystackData = await paystackRes.json();
-    const transactions = paystackData.data || [];
-
     let recoveredCount = 0;
+    let page = 1;
+    let hasMore = true;
 
-    for (const tx of transactions) {
-      const { reference, amount, metadata, customer } = tx;
-
-      // Ensure it's a vote transaction
-      if (!metadata || !metadata.nominee_id || !metadata.quantity) continue;
-
-      // Check if this reference already exists in our DB
-      const { data: existingVote } = await supabaseAdmin.from('votes').select('id').eq('paystack_reference', reference).single();
-      
-      if (existingVote) continue; // Already processed!
-
-      // Double check amount against expected cost
-      const { data: settings } = await supabaseAdmin.from('event_settings').select('vote_cost_pesewas').single();
-      const expectedCost = (settings?.vote_cost_pesewas || 100) * metadata.quantity;
-
-      if (amount < expectedCost) continue;
-
-      // Recover the missing vote!
-      const { error: dbError } = await supabaseAdmin.from('votes').insert({
-        nominee_id: metadata.nominee_id,
-        category_id: metadata.category_id,
-        voter_name: metadata.voter_name || 'Anonymous Recovery',
-        voter_email: customer?.email || 'unknown@recovery.com',
-        amount_pesewas: amount,
-        quantity: metadata.quantity,
-        paystack_reference: reference,
-        payment_status: 'success',
-        verified_at: new Date().toISOString()
+    // Fetch up to 10 pages (1000 transactions) to ensure we don't miss any recent ones
+    while (hasMore && page <= 10) {
+      const paystackRes = await fetch(`https://api.paystack.co/transaction?status=success&perPage=100&page=${page}`, {
+        headers: { Authorization: `Bearer ${secret}` },
       });
-
-      if (!dbError) {
-        recoveredCount += metadata.quantity;
+      
+      if (!paystackRes.ok) {
+        if (page === 1) return NextResponse.json({ error: 'Failed to communicate with Paystack' }, { status: 500 });
+        break; // Stop fetching on error, but process what we have
       }
+
+      const paystackData = await paystackRes.json();
+      const transactions = paystackData.data || [];
+      
+      if (transactions.length === 0) break;
+
+      for (const tx of transactions) {
+        const { reference, amount, metadata, customer } = tx;
+
+        // Ensure it's a vote transaction
+        if (!metadata || !metadata.nominee_id || !metadata.quantity) continue;
+
+        // Check if this reference already exists in our DB
+        const { data: existingVote } = await supabaseAdmin.from('votes').select('id').eq('paystack_reference', reference).single();
+        
+        if (existingVote) continue; // Already processed!
+
+        // Double check amount against expected cost
+        const { data: settings } = await supabaseAdmin.from('event_settings').select('vote_cost_pesewas').single();
+        const expectedCost = (settings?.vote_cost_pesewas || 100) * metadata.quantity;
+
+        if (amount < expectedCost) continue;
+
+        // Recover the missing vote!
+        const { error: dbError } = await supabaseAdmin.from('votes').insert({
+          nominee_id: metadata.nominee_id,
+          category_id: metadata.category_id,
+          voter_name: metadata.voter_name || 'Anonymous Recovery',
+          voter_email: customer?.email || 'unknown@recovery.com',
+          amount_pesewas: amount,
+          quantity: metadata.quantity,
+          paystack_reference: reference,
+          payment_status: 'success',
+          verified_at: new Date().toISOString()
+        });
+
+        if (!dbError) {
+          recoveredCount += metadata.quantity;
+        }
+      }
+      
+      // Paystack pagination: meta.pageCount
+      if (paystackData.meta && page >= paystackData.meta.pageCount) {
+        hasMore = false;
+      }
+      page++;
     }
 
     return NextResponse.json({ success: true, recoveredCount });
