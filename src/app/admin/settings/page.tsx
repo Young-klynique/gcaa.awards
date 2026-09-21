@@ -48,6 +48,7 @@ export default function AdminSettings() {
       nomination_end: formatForDB(settings.nomination_end),
       voting_start: formatForDB(settings.voting_start),
       voting_end: formatForDB(settings.voting_end),
+      vote_cost_pesewas: settings.vote_cost_pesewas,
     };
 
     const { error } = await supabase.from('event_settings').update(updates).eq('id', settings.id);
@@ -127,9 +128,16 @@ export default function AdminSettings() {
                  <label className="form-label">Cost per Vote</label>
                  <div className="relative">
                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500">GH₵</span>
-                   <input type="number" disabled readOnly className="form-input pl-12 bg-dark-900 cursor-not-allowed opacity-70" value="1.00" />
+                   <input 
+                     type="number" 
+                     min="0.1" 
+                     step="0.1"
+                     className="form-input pl-12 bg-dark-900" 
+                     value={(settings.vote_cost_pesewas / 100).toString()} 
+                     onChange={e => setSettings({...settings, vote_cost_pesewas: Math.round(parseFloat(e.target.value || '0') * 100)})} 
+                   />
                  </div>
-                 <p className="text-xs text-dark-400 mt-1">Fixed at GH₵ 1.00 (100 pesewas) per vote.</p>
+                 <p className="text-xs text-dark-400 mt-1">Cost in Ghana Cedis (e.g. 5 = GH₵ 5.00)</p>
               </div>
               <div>
                  <label className="form-label">Max Votes per Transaction</label>
