@@ -26,12 +26,14 @@ export async function POST(request: Request) {
     
     // 2. Double check event settings for expected cost
     const supabaseAdmin = createAdminClient();
-    const { data: settings } = await supabaseAdmin.from('event_settings').select('vote_cost_pesewas').single();
+    const { data: settings } = await supabaseAdmin.from('event_settings').select('vote_cost_pesewas, double_voting').single();
     const expectedCost = (settings?.vote_cost_pesewas || 300) * quantity;
 
     if (amountPaid < expectedCost) {
        return NextResponse.json({ success: false, error: 'Payment amount mismatch' }, { status: 400 });
     }
+
+    const quantityToRecord = settings?.double_voting ? quantity * 2 : quantity;
 
     // 3. Record the vote in DB
     // The DB trigger `on_vote_verified` will automatically update the nominee's `vote_count`
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
       voter_name,
       voter_email,
       amount_pesewas: amountPaid,
-      quantity,
+      quantity: quantityToRecord,
       paystack_reference: reference,
       payment_status: 'success',
       verified_at: new Date().toISOString()

@@ -10,6 +10,7 @@ export interface EventSettings {
   allow_multiple_votes: boolean;
   max_votes_per_person: number;
   show_nominee_votes?: boolean;
+  double_voting?: boolean;
   created_at: string;
   updated_at: string;
 }

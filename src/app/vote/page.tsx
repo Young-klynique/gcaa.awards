@@ -70,8 +70,9 @@ export default function VotePage() {
               });
               const data = await verifyRes.json();
               if (data.success) {
-                toast.success(`Successfully cast ${voteQty} vote(s) for ${selectedNominee.name}!`);
-                setNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, vote_count: n.vote_count + voteQty } : n));
+                const addedVotes = settings?.double_voting ? voteQty * 2 : voteQty;
+                toast.success(`Successfully cast ${addedVotes} vote(s) for ${selectedNominee.name}!`);
+                setNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, vote_count: n.vote_count + addedVotes } : n));
                 setSelectedNominee(null); setVoterEmail(''); setVoterName(''); setVoteQty(1);
               } else { toast.error(data.error || 'Payment verification failed'); }
             } catch { toast.error('Error verifying payment'); }
@@ -109,6 +110,14 @@ export default function VotePage() {
             <div className="glass-card p-10 text-center"><p className="text-dark-400 text-lg">Voting has not yet started come back another time</p></div>
           ) : (
             <>
+              {settings?.double_voting && (
+                <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-gold-500/20 to-amber-600/20 border border-gold-500/30 text-center animate-pulse">
+                  <span className="text-gold-400 font-bold text-lg flex items-center justify-center gap-2">
+                    🔥 DOUBLE VOTING IS ACTIVE! 🔥
+                  </span>
+                  <p className="text-dark-200 text-sm mt-1">Every vote you buy will automatically be multiplied by 2!</p>
+                </div>
+              )}
               {/* Filters */}
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <div className="relative flex-1">
@@ -180,7 +189,17 @@ export default function VotePage() {
               </div>
 
               <div className="glass-card-light p-4 rounded-xl">
-                <div className="flex justify-between text-sm mb-1"><span className="text-dark-400">{voteQty} vote(s) × {formatCurrency(costPerVote)}</span><span className="text-dark-200 font-bold">{formatCurrency(totalCost)}</span></div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-dark-400">
+                    {voteQty} {settings?.double_voting && <span className="text-gold-400 font-bold">× 2</span>} vote(s) × {formatCurrency(costPerVote)}
+                  </span>
+                  <span className="text-dark-200 font-bold">{formatCurrency(totalCost)}</span>
+                </div>
+                {settings?.double_voting && (
+                  <div className="text-xs text-gold-400 mt-2 text-center bg-gold-500/10 py-1 rounded">
+                    {selectedNominee.name} will receive <strong>{voteQty * 2} votes!</strong>
+                  </div>
+                )}
               </div>
 
               <button onClick={handleVote} disabled={processing || !voterEmail} className="gold-btn w-full flex items-center justify-center gap-2">

@@ -42,10 +42,12 @@ export async function POST() {
         if (existingVote) continue; // Already processed!
 
         // Double check amount against expected cost
-        const { data: settings } = await supabaseAdmin.from('event_settings').select('vote_cost_pesewas').single();
+        const { data: settings } = await supabaseAdmin.from('event_settings').select('vote_cost_pesewas, double_voting').single();
         const expectedCost = (settings?.vote_cost_pesewas || 100) * metadata.quantity;
 
         if (amount < expectedCost) continue;
+
+        const quantityToRecord = settings?.double_voting ? metadata.quantity * 2 : metadata.quantity;
 
         // Recover the missing vote!
         const { error: dbError } = await supabaseAdmin.from('votes').insert({
@@ -54,7 +56,7 @@ export async function POST() {
           voter_name: metadata.voter_name || 'Anonymous Recovery',
           voter_email: customer?.email || 'unknown@recovery.com',
           amount_pesewas: amount,
-          quantity: metadata.quantity,
+          quantity: quantityToRecord,
           paystack_reference: reference,
           payment_status: 'success',
           verified_at: new Date().toISOString()

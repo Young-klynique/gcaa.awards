@@ -44,6 +44,7 @@ export default function AdminSettings() {
       allow_multiple_votes: settings.allow_multiple_votes,
       max_votes_per_person: settings.max_votes_per_person,
       show_nominee_votes: settings.show_nominee_votes !== undefined ? settings.show_nominee_votes : true,
+      double_voting: settings.double_voting || false,
       nomination_start: formatForDB(settings.nomination_start),
       nomination_end: formatForDB(settings.nomination_end),
       voting_start: formatForDB(settings.voting_start),
@@ -57,6 +58,8 @@ export default function AdminSettings() {
     if (error) { 
       if (error.message.includes('show_nominee_votes')) {
         toast.error('Database column missing! Please run this in your Supabase SQL Editor: ALTER TABLE event_settings ADD COLUMN show_nominee_votes BOOLEAN DEFAULT true;');
+      } else if (error.message.includes('double_voting')) {
+        toast.error('Database column missing! Please run this in your Supabase SQL Editor: ALTER TABLE event_settings ADD COLUMN double_voting BOOLEAN DEFAULT false;');
       } else {
         toast.error('Failed to save settings: ' + error.message); 
       }
@@ -143,10 +146,18 @@ export default function AdminSettings() {
                  <label className="form-label">Max Votes per Transaction</label>
                  <input type="number" min="1" className="form-input" value={settings.max_votes_per_person} onChange={e => setSettings({...settings, max_votes_per_person: parseInt(e.target.value)})} />
               </div>
-              <div className="col-span-full pt-2">
+              <div className="col-span-full pt-2 space-y-4">
                  <div className="flex items-center gap-3">
                    <input type="checkbox" id="allowMulti" checked={settings.allow_multiple_votes} onChange={e => setSettings({...settings, allow_multiple_votes: e.target.checked})} className="w-5 h-5 accent-gold-500 rounded bg-dark-800" />
                    <label htmlFor="allowMulti" className="text-sm text-dark-200">Allow users to select quantity and pay for multiple votes at once (Highly Recommended)</label>
+                 </div>
+                 
+                 <div className="flex items-center gap-3 p-3 rounded-lg border border-gold-500/30 bg-gold-500/5">
+                   <input type="checkbox" id="doubleVoting" checked={settings.double_voting || false} onChange={e => setSettings({...settings, double_voting: e.target.checked})} className="w-5 h-5 accent-gold-500 rounded bg-dark-800" />
+                   <label htmlFor="doubleVoting" className="text-sm text-dark-200">
+                     <strong className="block mb-1 text-gold-400">🔥 Enable Double Voting (2x)</strong>
+                     When active, every vote purchased automatically counts as 2 votes! (e.g. paying for 20 votes will automatically give the nominee 40 votes).
+                   </label>
                  </div>
               </div>
            </div>
