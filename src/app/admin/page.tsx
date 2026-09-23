@@ -18,20 +18,30 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function loadStats() {
       // Execute counts in parallel
-      const [nomRes, activeNomRes, voteRes] = await Promise.all([
+      const [nomRes, activeNomRes, voteRes, allNomsVotes] = await Promise.all([
         supabase.from('nominations').select('*', { count: 'exact', head: true }),
         supabase.from('nominees').select('*', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('votes').select('amount_pesewas').eq('payment_status', 'success')
+        supabase.from('votes').select('amount_pesewas').eq('payment_status', 'success'),
+        supabase.from('nominees').select('id, name, code, votes(amount_pesewas, payment_status)')
       ]);
 
       const totalRevenue = voteRes.data?.reduce((sum, v) => sum + v.amount_pesewas, 0) || 0;
+      
+      let topEarners = [];
+      if (allNomsVotes.data) {
+         topEarners = allNomsVotes.data.map((n: any) => {
+           const rev = (n.votes || []).filter((v: any) => v.payment_status === 'success').reduce((sum: number, v: any) => sum + v.amount_pesewas, 0);
+           return { name: n.name, code: n.code, revenue: rev };
+         }).sort((a: any, b: any) => b.revenue - a.revenue).slice(0, 5);
+      }
       
       setStats({
         nominations: nomRes.count || 0,
         nominees: activeNomRes.count || 0,
         votes: voteRes.data?.length || 0,
         revenue: totalRevenue,
-      });
+        topEarners
+      } as any);
       
       setLoading(false);
     }
@@ -91,13 +101,39 @@ export default function AdminDashboard() {
            </div>
         </div>
         
-        <div className="glass-card p-6 border border-dark-800 flex items-center justify-center">
-            <div className="text-center">
-               <div className="w-20 h-20 rounded-full bg-dark-800 flex items-center justify-center mx-auto mb-4 border border-dark-700">
-                  <Vote className="w-10 h-10 text-dark-500" />
+        <div className="glass-card p-6 border border-dark-800">
+           <div className="flex items-center justify-between mb-6">
+             <h3 className="text-lg font-bold text-dark-100">Top Earners</h3>
+             <Trophy className="w-5 h-5 text-gold-400" />
+           </div>
+           
+           {(stats as any).topEarners?.length > 0 ? (
+             <div className="space-y-4">
+               {(stats as any).topEarners.map((earner: any, idx: number) => (
+                 <div key={idx} className="flex items-center justify-between p-3 bg-dark-800/50 rounded-lg border border-dark-700/50">
+                   <div className="flex items-center gap-3">
+                     <div className="w-8 h-8 rounded bg-dark-700 flex items-center justify-center text-dark-300 font-bold text-sm">
+                       #{idx + 1}
+                     </div>
+                     <div>
+                       <p className="font-medium text-dark-100 text-sm truncate max-w-[150px] sm:max-w-[200px]">{earner.name}</p>
+                       <p className="text-xs text-dark-400">{earner.code}</p>
+                     </div>
+                   </div>
+                   <div className="text-right">
+                     <p className="font-bold text-green-400 text-sm">{formatCurrency(earner.revenue)}</p>
+                   </div>
+                 </div>
+               ))}
+             </div>
+           ) : (
+             <div className="text-center py-8">
+               <div className="w-16 h-16 rounded-full bg-dark-800 flex items-center justify-center mx-auto mb-4 border border-dark-700">
+                  <Vote className="w-8 h-8 text-dark-500" />
                </div>
-               <p className="text-dark-400 text-sm max-w-xs mx-auto">Detailed voting charts and analytics will appear here as data accumulates.</p>
-            </div>
+               <p className="text-dark-400 text-sm">No revenue data available yet.</p>
+             </div>
+           )}
         </div>
       </div>
     </div>
