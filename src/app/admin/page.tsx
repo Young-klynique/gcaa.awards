@@ -21,11 +21,12 @@ export default function AdminDashboard() {
       const [nomRes, activeNomRes, voteRes, allNomsVotes] = await Promise.all([
         supabase.from('nominations').select('*', { count: 'exact', head: true }),
         supabase.from('nominees').select('*', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('votes').select('amount_pesewas').eq('payment_status', 'success'),
+        supabase.from('votes').select('amount_pesewas, quantity').eq('payment_status', 'success'),
         supabase.from('nominees').select('id, name, code, votes(amount_pesewas, payment_status)')
       ]);
 
       const totalRevenue = voteRes.data?.reduce((sum, v) => sum + v.amount_pesewas, 0) || 0;
+      const totalVotesQuantity = voteRes.data?.reduce((sum, v) => sum + v.quantity, 0) || 0;
       
       let topEarners = [];
       if (allNomsVotes.data) {
@@ -38,7 +39,7 @@ export default function AdminDashboard() {
       setStats({
         nominations: nomRes.count || 0,
         nominees: activeNomRes.count || 0,
-        votes: voteRes.data?.length || 0,
+        votes: totalVotesQuantity,
         revenue: totalRevenue,
         topEarners
       } as any);
