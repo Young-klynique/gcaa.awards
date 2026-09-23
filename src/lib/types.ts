@@ -52,6 +52,7 @@ export interface Nominee {
   is_active: boolean;
   created_at: string;
   category?: Category;
+  votes?: any[];
 }
 
 export interface Vote {

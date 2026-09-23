@@ -22,7 +22,7 @@ export default function AdminNominees() {
   const loadData = async () => {
     setLoading(true);
     const [nomRes, catRes] = await Promise.all([
-      supabase.from('nominees').select('*, category:categories(name)').order('vote_count', { ascending: false }),
+      supabase.from('nominees').select('*, category:categories(name), votes(amount_pesewas, quantity, payment_status)').order('vote_count', { ascending: false }),
       supabase.from('categories').select('*').eq('is_active', true)
     ]);
     if (nomRes.data) setNominees(nomRes.data as Nominee[]);
@@ -84,6 +84,27 @@ export default function AdminNominees() {
     loadData();
   };
 
+  const [viewRevenueNominee, setViewRevenueNominee] = useState<Nominee | null>(null);
+
+  const calculateRevenue = (n: Nominee) => {
+    const successfulVotes = n.votes?.filter(v => v.payment_status === 'success') || [];
+    let regularVotes = 0;
+    let doubleVotes = 0;
+    let totalRevenue = 0;
+
+    successfulVotes.forEach(v => {
+      totalRevenue += v.amount_pesewas;
+      const baseVotes = v.amount_pesewas / 100;
+      if (v.quantity === baseVotes * 2) {
+        doubleVotes += v.quantity;
+      } else {
+        regularVotes += v.quantity;
+      }
+    });
+
+    return { regularVotes, doubleVotes, totalRevenue: totalRevenue / 100 };
+  };
+
   const filteredNominees = nominees.filter(n => {
     const matchCat = filterCat === 'all' || n.category_id === filterCat;
     const matchSearch = n.name.toLowerCase().includes(searchQuery.toLowerCase()) || n.code.toLowerCase().includes(searchQuery.toLowerCase());
@@ -142,14 +163,64 @@ export default function AdminNominees() {
              <div className="p-4 flex-1 flex flex-col">
                 <h3 className="font-bold text-dark-100 truncate">{n.name}</h3>
                 <p className="text-xs text-dark-400 truncate mb-3">{(n.category as unknown as Category)?.name}</p>
-                <div className="mt-auto flex items-center justify-between border-t border-dark-800/50 pt-3">
-                   <div className="flex items-center gap-1 text-gold-400 font-bold"><Trophy className="w-4 h-4" /> {n.vote_count}</div>
-                   <button onClick={() => { setEditingNominee(n); setPhotoFile(null); }} className="p-2 bg-dark-800 hover:bg-dark-700 text-dark-200 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                <div className="mt-auto flex flex-col gap-2 border-t border-dark-800/50 pt-3">
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-1 text-gold-400 font-bold"><Trophy className="w-4 h-4" /> {n.vote_count}</div>
+                     <button onClick={() => { setEditingNominee(n); setPhotoFile(null); }} className="p-2 bg-dark-800 hover:bg-dark-700 text-dark-200 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                   </div>
+                   <button onClick={() => setViewRevenueNominee(n)} className="w-full py-1.5 text-xs font-medium bg-dark-800 text-dark-200 hover:text-gold-400 rounded-lg transition-colors border border-dark-700 hover:border-gold-500/30">
+                     View Revenue
+                   </button>
                 </div>
              </div>
           </div>
         ))}
       </div>
+
+      {/* Revenue Modal */}
+      {viewRevenueNominee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+           <div className="glass-card p-6 max-w-sm w-full">
+              <div className="flex justify-between items-center mb-6">
+                 <h2 className="text-xl font-bold text-dark-100">Revenue Breakdown</h2>
+                 <button onClick={() => setViewRevenueNominee(null)} className="text-dark-400 hover:text-dark-200"><X className="w-5 h-5" /></button>
+              </div>
+              
+              <div className="text-center mb-6">
+                 <h3 className="font-display font-bold text-lg text-gold-400">{viewRevenueNominee.name}</h3>
+                 <p className="text-sm text-dark-400">{viewRevenueNominee.code}</p>
+              </div>
+
+              {(() => {
+                 const stats = calculateRevenue(viewRevenueNominee);
+                 return (
+                   <div className="space-y-4">
+                     <div className="flex justify-between p-3 bg-dark-800 rounded-lg">
+                       <span className="text-dark-300 text-sm">Total Recorded Votes</span>
+                       <span className="font-bold text-dark-100">{viewRevenueNominee.vote_count}</span>
+                     </div>
+                     <div className="flex justify-between p-3 bg-dark-800/50 rounded-lg">
+                       <span className="text-dark-300 text-sm">Regular Votes (1x)</span>
+                       <span className="font-bold text-dark-100">{stats.regularVotes}</span>
+                     </div>
+                     <div className="flex justify-between p-3 bg-gold-500/10 border border-gold-500/20 rounded-lg">
+                       <span className="text-gold-400 text-sm">Double Votes (2x)</span>
+                       <span className="font-bold text-gold-400">{stats.doubleVotes}</span>
+                     </div>
+                     <div className="mt-6 pt-4 border-t border-dark-800">
+                       <div className="flex justify-between items-center">
+                         <span className="text-dark-200 font-bold">Total Revenue Generated</span>
+                         <span className="text-xl font-display font-bold text-green-400">GH₵ {stats.totalRevenue.toFixed(2)}</span>
+                       </div>
+                     </div>
+                   </div>
+                 );
+              })()}
+              
+              <button onClick={() => setViewRevenueNominee(null)} className="mt-6 w-full gold-btn">Close</button>
+           </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editingNominee && (
